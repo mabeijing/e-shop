@@ -33,3 +33,9 @@ Flask重要概念：
 代理对象必须在入栈后才能使用
 应用上下文可以通过flask实例app.app_context()创建一个应用上下文。获取代码逻辑，自己的代码都可以在应用上下文种执行。
 请求上下文比较难构造。app.app.test_request_context()必须传入值才能得到有效上下文。
+
+
+
+启动celery
+启动celery worker： celery -A app.celery_app worker -P solo --loglevel=info
+启动celery定时任务： celery -A app.celery_app beat
