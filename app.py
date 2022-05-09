@@ -1,10 +1,11 @@
-from flask import Flask, session, request, jsonify
+from flask import Flask, session, request, jsonify, g
 from settings import DEV
 from models import *
 from werkzeug.utils import secure_filename
 import os
 from celery import Celery
 from celery.utils.log import get_task_logger
+import threading
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
@@ -58,7 +59,6 @@ def send_sms():
 
 @celery_app.task(name='app.my_background_task', bind=True, serializer='json')
 def my_background_task(self, user_id):
-    # print(dir(self))
     self.update_state(state="PROGRESS", meta={'progress': 10})
     celery_logger.error('this is error log.')
     time.sleep(10)
@@ -70,8 +70,18 @@ def my_background_task(self, user_id):
     return [address.serialize() for address in address_list]
 
 
+def sub_task():
+    print('sub task start')
+    time.sleep(5)
+    print('sub task done')
+    return 'hello'
+
+
 @app.route("/task")
 def task():
+    print(g.name)
+    task1 = threading.Thread(target=sub_task)
+    task1.start()
     # 发送任务到celery,并返回任务ID,后续可以根据此任务ID获取任务结果
     user_id = session.get('user_id')
     result = my_background_task.delay(user_id)
@@ -93,6 +103,7 @@ def get_result(result_id):
 
 @app.before_request
 def is_login():
+    g.name = 'before request~~~'
     white_list = ['/login', '/register']
     if request.method == 'POST' and request.path in white_list:
         return
