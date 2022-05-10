@@ -131,6 +131,7 @@ ext = FlaskCeleryExt(app)
 # 这里注意。不能直接从task导入send_sms，会导致循环导入。
 # from tasks.scheduler import send_sms
 # 但是可以放在视图函数内使用
+# 如果放在蓝图，就不会产生循环导入的问题
 
 @app.route('/task', methods=['POST'])
 def task():

@@ -1,14 +1,13 @@
-from flask import Flask, session, request, jsonify, g, copy_current_request_context
+from flask import Flask, session, request, jsonify, g
 from flask_celeryext import FlaskCeleryExt
 from settings import DEV
 from models import *
 from werkzeug.utils import secure_filename
 from utils import make_celery, get_now, image_md5
 from sqlalchemy.exc import SQLAlchemyError
+from api import api
 
-import time
 import os
-import threading
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
@@ -17,38 +16,12 @@ db.init_app(app)
 ext = FlaskCeleryExt(create_celery_app=make_celery)
 ext.init_app(app)
 
+app.register_blueprint(api)
+
 
 # with app.app_context():
 #     db.init_app(app)
 #     db.create_all()
-
-
-def send_email():
-    print('sub task start')
-    print(request.url)
-    print(session.get('user_id'))
-    time.sleep(5)
-    print('sub task done')
-    return 'hello'
-
-
-@app.route("/task")
-def task():
-    print(g.name)
-    from tasks.background import async_get_address
-
-    @copy_current_request_context
-    def sub_task():
-        return send_email()
-
-    task1 = threading.Thread(target=sub_task)
-    task1.start()
-    # 发送任务到celery,并返回任务ID,后续可以根据此任务ID获取任务结果
-    user_id = session.get('user_id')
-    result = async_get_address.delay(user_id)
-    # result = send_sms.delay()
-    # return 'pass'
-    return result.id
 
 
 @app.route("/task/<result_id>")
