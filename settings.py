@@ -27,20 +27,21 @@ class DEV:
     # redis://:password@hostname:port/db_number
     CELERY_BROKER_URL = 'redis://:root123@localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://:root123@localhost:6379/0'
-    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_TASK_SERIALIZER = 'json'  # default json，pickle ，yaml ，msgpack
     CELERY_RESULT_SERIALIZER = 'json'
-    # CELERY_ACCEPT_CONTENT = ['json']
-    CELERYD_CONCURRENCY = 20  # 并发数
-    CELERYD_FORCE_EXECV = True  # 并发下防止死锁
+    CELERY_WORKER_CONCURRENCY = 20  # 并发数
+    CELERY_TASK_TIME_LIMIT = 3600  # 秒
     CELERY_TIMEZONE = 'Asia/Shanghai'  # celery使用的时区
     CELERY_ENABLE_UTC = True  # 启动时区设置
+    CELERY_WORKER_LOG_COLOR = True
     CELERY_IMPORTS = (
-        "app"
+        "tasks.scheduler",
+        "tasks.background"
     )
     # celery beat
-    CELERYBEAT_SCHEDULE = {
-        'app.send_sms': {
-            'task': 'app.send_sms',
+    CELERY_BEAT_SCHEDULE = {
+        'tasks': {
+            'task': 'tasks.scheduler.send_sms',
             'schedule': crontab(minute="*/1"),
             # 'schedule': timedelta(seconds=10),
             'args': ()

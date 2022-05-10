@@ -1,72 +1,24 @@
 from flask import Flask, session, request, jsonify, g, copy_current_request_context
+from flask_celeryext import FlaskCeleryExt
 from settings import DEV
 from models import *
 from werkzeug.utils import secure_filename
+from utils import make_celery
+
 import os
-from celery import Celery
-from celery.utils.log import get_task_logger
 import threading
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
 db.init_app(app)
 
-celery_logger = get_task_logger(__name__)
-
-
-def make_celery(_app):
-    _celery = Celery(
-        _app.import_name,
-        backend=_app.config['CELERY_RESULT_BACKEND'],
-        broker=_app.config['CELERY_BROKER_URL']
-    )
-
-    _celery.conf.update(_app.config)
-
-    class ContextTask(_celery.Task):
-
-        def on_success(self, retval, task_id, args, kwargs):
-            print('task done: {0}'.format(retval))
-            return super().on_success(retval, task_id, args, kwargs)
-
-        def on_failure(self, exc, task_id, args, kwargs, einfo):
-            print('task fail, reason: {0}'.format(exc))
-            return super().on_failure(exc, task_id, args, kwargs, einfo)
-
-        def __call__(self, *args, **kwargs):
-            with _app.app_context():
-                return self.run(*args, **kwargs)
-
-    _celery.Task = ContextTask
-    return _celery
-
-
-celery_app = make_celery(app)
+ext = FlaskCeleryExt(create_celery_app=make_celery)
+ext.init_app(app)
 
 
 # with app.app_context():
 #     db.init_app(app)
 #     db.create_all()
-
-@celery_app.task(name='app.send_sms')
-def send_sms():
-    time.sleep(10)
-    print('准备发送短信')
-    celery_logger.error('异步发短信成功')
-    return '发送成功'
-
-
-@celery_app.task(name='app.my_background_task', bind=True, serializer='json')
-def my_background_task(self, user_id):
-    self.update_state(state="PROGRESS", meta={'progress': 10})
-    celery_logger.error('this is error log.')
-    time.sleep(10)
-    self.update_state(state="PROGRESS", meta={'progress': 50})
-    user = User.query.filter_by(user_id=user_id).first()
-    address_list = user.address.filter_by(user_id=user_id).all()
-    time.sleep(10)
-    self.update_state(state="PROGRESS", meta={'progress': 100})
-    return [address.serialize() for address in address_list]
 
 
 def send_email():
@@ -81,6 +33,7 @@ def send_email():
 @app.route("/task")
 def task():
     print(g.name)
+    from tasks.background import async_get_address
 
     @copy_current_request_context
     def sub_task():
@@ -90,7 +43,9 @@ def task():
     task1.start()
     # 发送任务到celery,并返回任务ID,后续可以根据此任务ID获取任务结果
     user_id = session.get('user_id')
-    result = my_background_task.delay(user_id)
+    result = async_get_address.delay(user_id)
+    # result = send_sms.delay()
+    # return 'pass'
     return result.id
 
 
@@ -102,7 +57,7 @@ def get_result(result_id):
     2, result.get() 这个是阻塞方法，还是会导致前端页面卡死
     3, result.result 这个是非阻塞方法，没执行返回None，执行完返回结果
     """
-    result = celery_app.AsyncResult(id=result_id)
+    result = ext.celery.AsyncResult(id=result_id)
     print(result.status)
     return jsonify(result.result)
 
