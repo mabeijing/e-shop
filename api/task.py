@@ -1,6 +1,6 @@
 import threading
 
-from flask import copy_current_request_context, request, session, g, jsonify
+from flask import copy_current_request_context, request, session, g
 from tasks.background import async_get_address
 from api import api
 
@@ -28,7 +28,5 @@ def task():
     # 发送任务到celery,并返回任务ID,后续可以根据此任务ID获取任务结果
     user_id = session.get('user_id')
     result = async_get_address.delay(user_id)
-    # result = send_sms.delay()
-    # return 'pass'
     return result.id
 

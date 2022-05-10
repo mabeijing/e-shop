@@ -12,11 +12,9 @@ import os
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
 db.init_app(app)
-
+app.register_blueprint(api)
 ext = FlaskCeleryExt(create_celery_app=make_celery)
 ext.init_app(app)
-
-app.register_blueprint(api)
 
 
 # with app.app_context():
