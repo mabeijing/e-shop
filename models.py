@@ -1,11 +1,9 @@
-import uuid
 import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.exc import SQLAlchemyError
-import hashlib
-import time
+
+from utils import generate_uid
 
 """
 默认外键，主键数据删除，外键更新null
@@ -29,28 +27,11 @@ import time
     ### 个人觉得，只有ChildModel加上 唯一约束和反向查询单一查询，才是一对一
     ### 如果不配置唯一约束，取消反向单一查询，可以不同的child有相同的parent，就是一对多
     
-On relationship Vip.tb_vip, 'dynamic' loaders cannot be used with many-to-one/one-to-one relationships and/or uselist=False.
-组合用法uselist=True, lazy='dynamic' 这个表示延迟加载，print(user.vip.all()) 必须使用all()才会执行擦汗寻。vip返回AppenderBaseQuery对象
+组合用法useless=True, lazy='dynamic' 这个表示延迟加载，
+print(user.vip.all()) 必须使用all()才会执行擦汗寻。vip返回AppenderBaseQuery对象
 如果usrlist=False，不可以配置lazy属性，表示直接在家，user.vip就可以拿到结果。
 
 """
-
-
-def get_now():
-    return datetime.now()
-
-
-def generate_uid():
-    return ''.join(str(uuid.uuid4()).split('-'))
-
-
-def image_md5(file):
-    salt = b'rGBIFVBK$%^&'
-    md5 = hashlib.md5(salt)
-    value = str(file) + str(time.perf_counter_ns())
-    md5.update(bytes(value, encoding='utf8'))
-    return md5.hexdigest()
-
 
 db = SQLAlchemy()
 
@@ -80,8 +61,9 @@ class BaseModel(db.Model):
         try:
             db.session.delete(self)
             db.session.commit()
-        except Exception:
+        except Exception as e:
             db.session.rollback()
+            raise e
 
     def serialize(self):
         value = {}

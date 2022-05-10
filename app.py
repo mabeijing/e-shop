@@ -3,8 +3,10 @@ from flask_celeryext import FlaskCeleryExt
 from settings import DEV
 from models import *
 from werkzeug.utils import secure_filename
-from utils import make_celery
+from utils import make_celery, get_now, image_md5
+from sqlalchemy.exc import SQLAlchemyError
 
+import time
 import os
 import threading
 
@@ -218,8 +220,8 @@ def delete_good_type():
 @app.route('/api/goods/type', methods=['POST'])
 def good_type():
     good_list = GoodType.query.all()
-    goods = [good.serialize() for good in good_list] if good_list else []
-    return jsonify(goods)
+    goods_li = [good.serialize() for good in good_list] if good_list else []
+    return jsonify(goods_li)
 
 
 @app.route('/api/goods/add', methods=['POST'])
