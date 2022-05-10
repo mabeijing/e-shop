@@ -3,13 +3,15 @@ import uuid
 import hashlib
 from datetime import datetime
 
-from celery import Celery
+from celery import current_app as current_celery_app
 
 
 def make_celery(_app):
     from flask_celeryext._mapping import FLASK_TO_CELERY_MAPPING
     from flask_celeryext.app import map_invenio_to_celery
-    _celery = Celery(_app.import_name)
+    # _celery = Celery(_app.import_name)
+    # 注意，这里一定要使用代理对象
+    _celery = current_celery_app
     config = map_invenio_to_celery(_app.config, FLASK_TO_CELERY_MAPPING)
     _celery.config_from_object(config)
 
