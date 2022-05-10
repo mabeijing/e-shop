@@ -1,6 +1,6 @@
 import time
 
-from . import celery
+from celery import current_app as celery
 
 
 @celery.task(name='tasks.scheduler.send_sms')
