@@ -27,7 +27,7 @@ ext.init_app(app)
 @app.before_request
 def is_login():
     g.name = 'before request~~~'
-    white_list = ['/login', '/register']
+    white_list = ['/api/user/login', '/api/user/register']
     if request.method == 'POST' and request.path in white_list:
         return
     if not session.get('user_id'):

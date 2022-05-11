@@ -1,18 +1,17 @@
-from flask import request, session
+from flask import request, session, jsonify
 from exceptions import *
 from . import api
 from models import *
 from utils import get_now
 
 
-@api.route('/register', methods=['POST'])
-def register():
+@api.route('/user/register', methods=['POST'])
+def user_register():
     account = request.form.get('account')
     admin = request.form.get('administrator')
     flag = False
     if str(admin) and (str(admin) == 'true' or str(admin) == 'True' or str(admin) == '1'):
         flag = True
-
     data = {
         'account': account,
         'password': request.form.get('password'),
@@ -29,11 +28,58 @@ def register():
         raise UserAlreadyExists()
     user = User(**data)
     user.save()
+    return user.serialize()
 
-    return 'pass'
+
+# string 不含/的任何字符
+@api.route('/user/<string:account>', methods=['POST'])
+def user_detail(account):
+    if session['is_admin']:
+        raise UserAccessNotAuthorized()
+    user = User.query.filter_by(account=account).first()
+    if not user:
+        raise UserNotFound(message=f'{account}用户不存在')
+    print(user.vip)
+    return user.serialize()
 
 
-@api.route('/login', methods=['POST'])
+@api.route('/users', methods=['GET', 'POST'])
+def user_list():
+    user_id = session.get('user_id')
+    admin = User.query.filter_by(user_id=user_id).first()
+    if not admin:
+        raise UserNotLogin()
+    users = [u.serialize() for u in User.query.filter_by().all() if u]
+    return jsonify(users)
+
+
+@api.route('/user/<string:account>', methods=['PUT'])
+def user_update(account: str):
+    if session.get('is_admin'):
+        raise UserNotAdmin()
+    user = User.query.filter_by(account=account).first()
+    if not user:
+        raise UserNotFound(message=f'{account}用户不存在')
+    age = request.form.get('age')
+    user.age = age
+    user.save()
+    return user.serialize()
+
+
+# build_in converter [string, int, float, path, uuid] default string
+@api.route('/user/<string:account>', methods=['DELETE'])
+def user_delete(account):
+    if session.get('is_admin'):
+        raise UserNotAdmin()
+
+    user = User.query.filter_by(account=account).first()
+    if not user:
+        raise UserNotFound(message=f'{account}用户未注册')
+    user.delete()
+    return {'status_code': 40000, 'message': f'{account}删除成功'}
+
+
+@api.route('/user/login', methods=['POST'])
 def login():
     account = request.form.get('account')
     password = request.form.get('password')
@@ -45,6 +91,7 @@ def login():
         user.login_time = get_now()
         user.save()
         session['user_id'] = user.user_id
+        session['is_admin'] = user.administrator
         if remember_me:
             session.permanent = True
     else:
@@ -52,20 +99,7 @@ def login():
     return user.serialize()
 
 
-# string 不含/的任何字符
-@api.route('/detail/<string:account>', methods=['POST'])
-def detail(account):
-    user = User.query.filter_by(account=account).first()
-    if not user:
-        raise UserNotFound(message=f'{account}用户不存在')
-    else:
-        if session.get('user_id') != user.user_id:
-            raise UserAccessNotAuthorized()
-    print(user.vip)
-    return user.serialize()
-
-
-@api.route('/logout', methods=['POST'])
+@api.route('/user/logout', methods=['POST'])
 def logout():
     user_id = session.get('user_id')
     user = User.query.filter_by(user_id=user_id).first()
@@ -74,17 +108,3 @@ def logout():
     session.clear()
 
     return {'status_code': 40000, 'message': f'{user.account}退出成功'}
-
-
-# build_in converter [string, int, float, path, uuid] default string
-@api.route('/delete/<string:account>', methods=['POST'])
-def delete_account(account):
-    user = User.query.filter_by(account=account).first()
-    user_id = session.get('user_id')
-    admin = User.query.filter_by(id=user_id).first()
-    if not admin.administrator:
-        raise UserNotAdmin()
-    if not user:
-        raise UserNotFound(message=f'{account}用户未注册')
-    user.delete()
-    return {'status_code': 40000, 'message': f'{account}删除成功'}

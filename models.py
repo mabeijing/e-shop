@@ -70,15 +70,15 @@ class BaseModel(db.Model):
 
         for column in [item for item in dir(self) if not (item.startswith('_') or item.startswith('__'))]:
             attribute = getattr(self, column, None)
-            if attribute:
+            if attribute is None:
+                value[column.upper()] = None
+            else:
                 if isinstance(attribute, int):
                     value[column.upper()] = attribute
                 if isinstance(attribute, (str, datetime)):
                     value[column.upper()] = str(attribute)
                 if isinstance(attribute, bool):
-                    value[column.upper()] = int(attribute)
-            else:
-                value[column.upper()] = attribute
+                    value[column.upper()] = attribute
 
         value.pop('PASSWORD') if 'PASSWORD' in value.keys() else None
         return value
