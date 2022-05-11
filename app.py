@@ -2,12 +2,10 @@ from flask import Flask, session, request, jsonify, g
 from flask_celeryext import FlaskCeleryExt
 from settings import DEV
 from models import *
-from werkzeug.utils import secure_filename
-from utils import make_celery, get_now, image_md5
+from utils import make_celery, get_now
 from sqlalchemy.exc import SQLAlchemyError
 from api import api
-
-import os
+from exceptions import *
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
@@ -23,14 +21,7 @@ ext.init_app(app)
 
 # @app.route("/task/<result_id>")
 # def get_result(result_id):
-#     # 根据任务ID获取任务结果
-#     """
-#     1, 一定要用celery的实例下的AsyncResult获取结果对象，不然获取不到执行结果
-#     2, result.get() 这个是阻塞方法，还是会导致前端页面卡死
-#     3, result.result 这个是非阻塞方法，没执行返回None，执行完返回结果
-#     """
 #     result = ext.celery.AsyncResult(id=result_id)
-#     print(result.status)
 #     return jsonify(result.result)
 
 @app.before_request
@@ -40,85 +31,7 @@ def is_login():
     if request.method == 'POST' and request.path in white_list:
         return
     if not session.get('user_id'):
-        return {'code': 40014, 'msg': '用户未登录'}
-
-
-@app.route('/register', methods=['POST'])
-def register():
-    account = request.form.get('account')
-    data = {
-        'account': account,
-        'password': request.form.get('password'),
-        'nick_name': request.form.get('nick_name'),
-        'age': request.form.get('age'),
-        'avatar': request.form.get('avatar'),
-        'id_card': request.form.get('id_card'),
-        'gender': request.form.get('gender'),
-        'balance': request.form.get('balance')
-    }
-
-    if User.query.filter_by(account=account).first():
-        return {'code': 40010, 'msg': '用户已存在'}
-    user = User(**data)
-    user.save()
-    return user.serialize()
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    account = request.form.get('account')
-    password = request.form.get('password')
-    remember_me = request.form.get('remember_me')
-    user = User.query.filter_by(account=account).first()
-    if not user:
-        return {'code': 40017, 'msg': '用户未注册'}
-    if user.check_password(password):
-        user.login_time = get_now()
-        user.save()
-        session['user_id'] = user.user_id
-        if remember_me:
-            session.permanent = True
-    else:
-        return {'code': 40016, 'msg': '用户名或密码不正确'}
-    return user.serialize()
-
-
-# string 不含/的任何字符
-@app.route('/detail/<string:account>', methods=['POST'])
-def detail(account):
-    user = User.query.filter_by(account=account).first()
-    if not user:
-        return {'code': 40015, 'msg': f'{account}用户不存在'}
-    else:
-        if session.get('user_id') != user.user_id:
-            return {'code': 40019, 'msg': '无权限操作他人用户'}
-    print(user.vip)
-    return user.serialize()
-
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    user_id = session.get('user_id')
-    user = User.query.filter_by(user_id=user_id).first()
-    user.logout_time = get_now()
-    user.save()
-    session.clear()
-    return {'code': 40018, 'msg': f'{user.account}退出成功'}
-
-
-# build_in converter [string, int, float, path, uuid] default string
-@app.route('/delete/<string:account>', methods=['POST'])
-def delete_account(account):
-    user = User.query.filter_by(account=account).first()
-    user_id = session.get('user_id')
-    admin = User.query.filter_by(user_id=user_id).first()
-    if admin.account == 'beijingm':
-        if not user:
-            return {'code': 40017, 'msg': f'{account}不存在'}
-        user.delete()
-        return {'code': 40020, 'msg': f'{account}删除成功'}
-    else:
-        return {'code': 40019, 'msg': '非管理员权限无法操作'}
+        raise UserNotLogin()
 
 
 @app.route('/address/list', methods=['POST'])
@@ -193,64 +106,6 @@ def good_type():
     return jsonify(goods_li)
 
 
-@app.route('/api/goods/add', methods=['POST'])
-def add_good():
-    avatar = request.files.get('avatar')
-    if not avatar:
-        file_path = ''
-    else:
-        file_path = f'static/uploads/{image_md5(secure_filename(avatar.filename))}.jpeg'
-        avatar.save(file_path)
-    data = {
-        'good_name': request.form.get('good_name'),
-        'good_type_id': request.form.get('good_type_id'),
-        'origin_price': request.form.get('origin_price'),
-        'sell_price': request.form.get('sell_price'),
-        'contains': request.form.get('contains'),
-        'produce_time': request.form.get('produce_time'),
-        'image': file_path
-    }
-    good = Goods(**data)
-    good.save()
-
-    return good.serialize()
-
-
-@app.route('/api/goods', methods=['POST', 'GET'])
-def goods():
-    if request.method == 'GET':
-        count = Goods.query.count()
-        return {'code': 40044, 'msg': count}
-    if request.method == 'POST':
-        _page = request.form.get('page')
-        _page_size = request.form.get('page_size')
-        page = int(_page) if _page else None
-        page_size = int(_page_size) if _page_size else None
-        paginate = Goods.query.paginate(page=page, per_page=page_size, error_out=False)
-        goods_list = [i.serialize() for i in paginate.items]
-        data = {
-            'total': paginate.total,
-            'pages': paginate.pages,
-            'goods_num': len(goods_list),
-            'goods': goods_list
-        }
-        return jsonify(data)
-
-
-@app.route('/api/goods/delete', methods=['DELETE'])
-def good_delete():
-    _id = request.form.get('id')
-    good = Goods.query.filter_by(id=_id).first()
-    if not good:
-        return {'code': 40444, 'msg': '查询的货物不存在'}
-    image = good.image
-    good_name = good.good_name
-    good.delete()
-    if image:
-        os.remove(path=image)
-    return {'code': 40044, 'msg': f'[{good_name}]删除成功'}
-
-
 @app.route('/vip/register', methods=['POST'])
 def add_vip():
     user_id = session.get('user_id')
@@ -278,6 +133,12 @@ def error_handle(e):
 @app.errorhandler(405)
 def error_handle(e):
     return {'code': e.code, 'msg': e.description}, 405
+
+
+@app.errorhandler(Exception)
+def error_handle(e: Exception):
+    if isinstance(e, BasicException):
+        return e.serialize()
 
 
 if __name__ == '__main__':

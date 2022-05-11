@@ -75,6 +75,8 @@ class BaseModel(db.Model):
                     value[column.upper()] = attribute
                 if isinstance(attribute, (str, datetime)):
                     value[column.upper()] = str(attribute)
+                if isinstance(attribute, bool):
+                    value[column.upper()] = int(attribute)
             else:
                 value[column.upper()] = attribute
 
@@ -99,6 +101,7 @@ class User(BaseModel):
     login_time = db.Column(db.DateTime, name='LOGIN_TIME')
     logout_time = db.Column(db.DateTime, name='LOGOUT_TIME')
     balance = db.Column(db.FLOAT(10), name='BALANCE')
+    administrator = db.Column(db.Boolean, default=False, name='ADMINISTRATOR')
 
     vip = db.relationship("Vip", backref=db.backref('tb_user'), uselist=False)
     address = db.relationship('Address', backref="user", lazy="dynamic")
