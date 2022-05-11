@@ -69,7 +69,7 @@ def user_update(account: str):
 # build_in converter [string, int, float, path, uuid] default string
 @api.route('/user/<string:account>', methods=['DELETE'])
 def user_delete(account):
-    if session.get('is_admin'):
+    if not session.get('is_admin'):
         raise UserNotAdmin()
 
     user = User.query.filter_by(account=account).first()

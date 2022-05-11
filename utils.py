@@ -3,6 +3,7 @@ import uuid
 import hashlib
 from datetime import datetime
 
+from flask_celeryext import FlaskCeleryExt
 from celery import current_app as current_celery_app
 
 
@@ -31,6 +32,9 @@ def make_celery(_app):
 
     _celery.Task = ContextTask
     return _celery
+
+
+ext = FlaskCeleryExt(create_celery_app=make_celery)
 
 
 def get_now():

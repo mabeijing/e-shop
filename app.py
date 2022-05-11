@@ -1,16 +1,20 @@
 from flask import Flask, session, request, g
-from flask_celeryext import FlaskCeleryExt
+from ext import ext
 from settings import DEV
-from utils import make_celery
+from utils import ext
 from api import api
 from exceptions import UserNotLogin
 from models import db
+from chart_room import socket_io
+from flask_cors import CORS
+
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
+CORS(app)
 db.init_app(app)
 app.register_blueprint(api)
-ext = FlaskCeleryExt(create_celery_app=make_celery)
 ext.init_app(app)
+socket_io.init_app(app)
 
 
 # with app.app_context():
@@ -39,4 +43,5 @@ def error_handle(e: Exception):
 
 
 if __name__ == '__main__':
-    app.run()
+    # app.run()
+    socket_io.run(app)
