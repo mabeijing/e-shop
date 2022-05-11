@@ -1,6 +1,6 @@
 import threading
 from flask_celeryext.app import current_celery_app
-from flask import copy_current_request_context, request, session, g, jsonify
+from flask import copy_current_request_context, request, session, jsonify
 from tasks.background import async_get_address
 from api import api
 
@@ -17,8 +17,6 @@ def send_email():
 
 @api.route("/task")
 def task():
-    print(g.name)
-
     @copy_current_request_context
     def sub_task():
         return send_email()

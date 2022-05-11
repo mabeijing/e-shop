@@ -5,7 +5,8 @@ from settings import DEV
 from utils import ext
 from web_service import socket_io
 from api import api
-from exceptions import UserNotLogin
+from exceptions import *
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
@@ -14,6 +15,26 @@ db.init_app(app)
 app.register_blueprint(api)
 ext.init_app(app)
 socket_io.init_app(app, cors_allowed_origins='*')
+from validate import FormatJsonValidate, UploadImageValidate
+
+
+@app.route('/format_json')
+def format_json():
+    image_form = UploadImageValidate(request.files)
+    if not image_form.validate():
+        return image_form.errors
+
+    data_form = FormatJsonValidate(request.form)
+    if not data_form.validate():
+        return data_form.errors
+
+    headers = request.headers
+    # if headers.get('Content-Type') != 'application/json':
+    #     raise ContentTypeError(message='Content-Type必须是(application/json)')
+
+    filename = secure_filename(image_form.image.data.filename)
+    image_form.image.data.save(filename)
+    return data_form.data
 
 
 # with app.app_context():
@@ -37,6 +58,11 @@ def is_login():
         return
     if not session.get('user_id'):
         raise UserNotLogin()
+
+
+@app.errorhandler(HttpBaseException)
+def error_handle(e):
+    return e.serialize()
 
 
 @app.errorhandler(Exception)

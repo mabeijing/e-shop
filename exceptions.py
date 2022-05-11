@@ -16,6 +16,10 @@ class BasicException(Exception):
         return {'status_code': self.status_code, 'message': self.message}
 
 
+class HttpBaseException(BasicException):
+    pass
+
+
 class UserBaseException(BasicException):
     pass
 
@@ -74,3 +78,8 @@ class AddressNotFound(AddressBaseException):
 class GoodTypeNotFound(GoodTypeBaseException):
     status_code = 40030
     message = '货物分类不存在'
+
+
+class ContentTypeError(HttpBaseException):
+    status_code = 40040
+    message = 'Content-Type类型错误'

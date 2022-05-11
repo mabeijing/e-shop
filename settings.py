@@ -24,6 +24,9 @@ class DEV:
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
     JSON_AS_ASCII = False  # 开启中文
 
+    WTF_CSRF_ENABLED = False
+    WTF_CSRF_SECRET_KEY = '123qwe'
+
     # redis://:password@hostname:port/db_number
     CELERY_BROKER_URL = 'redis://:root123@localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://:root123@localhost:6379/0'
