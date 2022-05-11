@@ -2,14 +2,13 @@ import time
 import uuid
 import hashlib
 from datetime import datetime
-
+from flask_celeryext._mapping import FLASK_TO_CELERY_MAPPING
+from flask_celeryext.app import map_invenio_to_celery
 from flask_celeryext import FlaskCeleryExt
 from celery import current_app as current_celery_app
 
 
-def make_celery(_app):
-    from flask_celeryext._mapping import FLASK_TO_CELERY_MAPPING
-    from flask_celeryext.app import map_invenio_to_celery
+def _make_celery(_app):
     # _celery = Celery(_app.import_name)
     # 注意，这里一定要使用代理对象
     _celery = current_celery_app
@@ -22,9 +21,9 @@ def make_celery(_app):
             print('task done: {0}'.format(retval))
             return super().on_success(retval, task_id, args, kwargs)
 
-        def on_failure(self, exc, task_id, args, kwargs, einfo):
+        def on_failure(self, exc, task_id, args, kwargs, e_info):
             print('task fail, reason: {0}'.format(exc))
-            return super().on_failure(exc, task_id, args, kwargs, einfo)
+            return super().on_failure(exc, task_id, args, kwargs, e_info)
 
         def __call__(self, *args, **kwargs):
             with _app.app_context():
@@ -34,7 +33,7 @@ def make_celery(_app):
     return _celery
 
 
-ext = FlaskCeleryExt(create_celery_app=make_celery)
+ext = FlaskCeleryExt(create_celery_app=_make_celery)
 
 
 def get_now():
@@ -46,8 +45,9 @@ def generate_uid():
 
 
 def image_md5(file):
-    salt = b'rGBIFVBK$%^&'
+    salt = b'5678654567%^&'
     md5 = hashlib.md5(salt)
     value = str(file) + str(time.perf_counter_ns())
     md5.update(bytes(value, encoding='utf8'))
     return md5.hexdigest()
+

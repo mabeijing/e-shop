@@ -1,5 +1,5 @@
 from flask_cors import CORS
-from flask import Flask, session, request, g
+from flask import Flask, session, request, url_for
 from models import db
 from settings import DEV
 from utils import ext
@@ -27,8 +27,7 @@ socket_io.init_app(app)
 
 @app.before_request
 def is_login():
-    g.name = 'before request~~~'
-    white_list = ['/api/user/login', '/api/user/register']
+    white_list = [url_for('api.user_login'), url_for('api.user_register')]
     if request.method == 'POST' and request.path in white_list:
         return
     if not session.get('user_id'):

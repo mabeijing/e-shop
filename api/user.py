@@ -80,7 +80,7 @@ def user_delete(account):
 
 
 @api.route('/user/login', methods=['POST'])
-def login():
+def user_login():
     account = request.form.get('account')
     password = request.form.get('password')
     remember_me = request.form.get('remember_me')
@@ -100,7 +100,7 @@ def login():
 
 
 @api.route('/user/logout', methods=['POST'])
-def logout():
+def user_logout():
     user_id = session.get('user_id')
     user = User.query.filter_by(user_id=user_id).first()
     user.logout_time = get_now()
