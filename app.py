@@ -1,12 +1,11 @@
+from flask_cors import CORS
 from flask import Flask, session, request, g
-from ext import ext
+from models import db
 from settings import DEV
 from utils import ext
 from api import api
-from exceptions import UserNotLogin
-from models import db
 from chart_room import socket_io
-from flask_cors import CORS
+from exceptions import UserNotLogin
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
