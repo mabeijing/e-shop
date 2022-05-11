@@ -50,4 +50,3 @@ def image_md5(file):
     value = str(file) + str(time.perf_counter_ns())
     md5.update(bytes(value, encoding='utf8'))
     return md5.hexdigest()
-

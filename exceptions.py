@@ -9,6 +9,9 @@ class BasicException(Exception):
         if message:
             self.message = message
 
+    def __str__(self):
+        return str(self.serialize())
+
     def serialize(self) -> dict:
         return {'status_code': self.status_code, 'message': self.message}
 
