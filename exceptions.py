@@ -21,7 +21,15 @@ class GoodBaseException(BasicException):
     pass
 
 
+class GoodTypeBaseException(BasicException):
+    pass
+
+
 class VipBaseException(BasicException):
+    pass
+
+
+class AddressBaseException(BasicException):
     pass
 
 
@@ -55,5 +63,11 @@ class UserNotAdmin(UserBaseException):
     message = '非管理员无法操作'
 
 
-class UserOperateSuccess(UserBaseException):
-    pass
+class AddressNotFound(AddressBaseException):
+    status_code = 40020
+    message = '地址不存在'
+
+
+class GoodTypeNotFound(GoodTypeBaseException):
+    status_code = 40030
+    message = '货物分类不存在'

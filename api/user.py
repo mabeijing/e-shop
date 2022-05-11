@@ -34,7 +34,7 @@ def user_register():
 # string 不含/的任何字符
 @api.route('/user/<string:account>', methods=['POST'])
 def user_detail(account):
-    if session['is_admin']:
+    if not session['is_admin']:
         raise UserAccessNotAuthorized()
     user = User.query.filter_by(account=account).first()
     if not user:
@@ -108,3 +108,8 @@ def logout():
     session.clear()
 
     return {'status_code': 40000, 'message': f'{user.account}退出成功'}
+
+
+@api.errorhandler(UserBaseException)
+def error_handle(e):
+    return e.serialize()
