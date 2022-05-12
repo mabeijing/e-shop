@@ -26,6 +26,10 @@ class SensitiveFilter:
 
 
 class BaseFlaskForm(FlaskForm):
+    """
+    开启内置类型验证错误message国际化。仅支持内置类型，比如IntegerField校验非int类型报错提示
+    还需要关闭 WTF_I18N_ENABLED = False
+    """
     class Meta:
         locales = ['zh']
 
