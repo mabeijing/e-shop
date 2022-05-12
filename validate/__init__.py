@@ -15,13 +15,14 @@ class BaseFlaskForm(FlaskForm):
 
 
 class FormatJsonValidate(BaseFlaskForm):
-    name = StringField('name', validators=[DataRequired(message='该字段为必填参数'),
-                                           Length(min=1, max=10, message='字符串长度在1-10位数')])
-    age = IntegerField('age', validators=[NumberRange(min=0, max=100, message='必须是0-100的整数'),
-                                          DataRequired(message='该字段为必填参数')])
+    name = StringField(label='用户名', validators=[DataRequired(message='该字段为必填参数'),
+                                                Length(min=1, max=10, message='字符串长度在1-10位数')])
+    age = IntegerField(label='年纪', validators=[NumberRange(min=0, max=100, message='必须是0-100的整数'),
+                                               DataRequired(message='该字段为必填参数')])
 
 
 class UploadImageValidate(BaseFlaskForm):
-    image = FileField('image', validators=[FileRequired(),
-                                           FileAllowed(['jpg', 'png'], message='只接收jpg,png类型'),
-                                           FileSize(max_size=1*1024*1024, message='最大支持1M')])
+    file = FileField('image', validators=[FileRequired(),
+                                          FileAllowed(['jpg', 'png', 'jpeg', 'csv'],
+                                                      message='只支持[jpg,png,jpeg,csv]格式的文件上传'),
+                                          FileSize(max_size=100 * 1024, message='最大支持100K')])
