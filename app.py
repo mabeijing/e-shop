@@ -3,7 +3,7 @@ from flask import Flask, session, request, url_for, render_template
 from validate import FormatJsonValidate, UploadImageValidate
 from models import db
 from settings import DEV
-from utils import ext
+from tasks import ext
 from web_service import socket_io
 from api import api
 from exceptions import *
@@ -15,6 +15,7 @@ CORS(app)
 db.init_app(app)
 app.register_blueprint(api)
 ext.init_app(app)
+celery = ext.celery
 socket_io.init_app(app, cors_allowed_origins='*')
 
 
