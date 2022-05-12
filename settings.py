@@ -26,6 +26,7 @@ class DEV:
 
     WTF_CSRF_ENABLED = False
     WTF_CSRF_SECRET_KEY = '123qwe'
+    WTF_I18N_ENABLED = False    # 如果使用flask_wtf，就需要关闭wtforms使用flask的
 
     # redis://:password@hostname:port/db_number
     CELERY_BROKER_URL = 'redis://:root123@localhost:6379/0'

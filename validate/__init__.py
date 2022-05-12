@@ -26,6 +26,9 @@ class SensitiveFilter:
 
 
 class BaseFlaskForm(FlaskForm):
+    class Meta:
+        locales = ['zh']
+
     def __init__(self, formdata, **kwargs):
         if isinstance(formdata, dict):
             new_data = ImmutableMultiDict(formdata)
@@ -38,8 +41,9 @@ class FormatJsonValidate(BaseFlaskForm):
     name = StringField(label='用户名', validators=[DataRequired(message='该字段为必填参数'),
                                                 Length(min=1, max=10, message='字符串长度在1-10位数'),
                                                 SensitiveFilter()])
-    age = IntegerField(label='年纪', validators=[NumberRange(min=0, max=100, message='必须是0-100的整数'),
-                                               InputRequired(message='该字段为必填参数')])
+    age = IntegerField(label='年纪',
+                       validators=[NumberRange(min=0, max=100, message='必须是0-100的整数'),
+                                   InputRequired(message='该字段为必填参数')])
 
 
 class UploadImageValidate(BaseFlaskForm):
