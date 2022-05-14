@@ -1,3 +1,5 @@
+import time
+
 from flask_cors import CORS
 from flask import Flask, session, request, url_for, render_template
 from validate import FormatJsonValidate, UploadImageValidate
@@ -8,26 +10,34 @@ from web_service import socket_io
 from api import api
 from exceptions import *
 from werkzeug.utils import secure_filename
+from flask_caching import Cache
+from flask_session import Session
+
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
 CORS(app)
+Session(app)
 db.init_app(app)
 app.register_blueprint(api)
 ext.init_app(app)
 celery = ext.celery
 socket_io.init_app(app, cors_allowed_origins='*')
 
+cache = Cache()
+cache.init_app(app)
+
 
 @app.route('/format_json')
+@cache.cached(timeout=2)
 def format_json():
-    data_form = FormatJsonValidate(request.args)
+    data_form = FormatJsonValidate(request.form)
     if not data_form.validate():
         return data_form.errors
     image_form = UploadImageValidate(request.files)
     if not image_form.validate():
         return image_form.errors
-
+    time.sleep(2)
     headers = request.headers
     # if headers.get('Content-Type') != 'application/json':
     #     raise ContentTypeError(message='Content-Type必须是(application/json)')

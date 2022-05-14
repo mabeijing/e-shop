@@ -1,12 +1,14 @@
 from urllib.parse import quote_plus
 from datetime import timedelta
+
+import redis
 from celery.schedules import crontab
 
 # 连接数据库
 
 # 增加对数据库密码特殊字符的兼容
 conf = {'username': 'root',
-        'password': quote_plus('root123'),
+        'password': quote_plus('Root123!'),
         'host': 'localhost',
         'port': 3306,
         'database': 'e-shop'}
@@ -24,9 +26,19 @@ class DEV:
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
     JSON_AS_ASCII = False  # 开启中文
 
+    SESSION_TYPE = 'redis'
+    SESSION_KEY_PREFIX = "session:"
+    SESSION_REDIS = redis.Redis(host='127.0.0.1', port='6379', password='root123')
+
+    CACHE_TYPE = 'redis'
+    CACHE_REDIS_HOST = '127.0.0.1'
+    CACHE_REDIS_PORT = 6379
+    CACHE_REDIS_PASSWORD = 'root123'
+    CACHE_REDIS_DB = 10
+
     WTF_CSRF_ENABLED = False
     WTF_CSRF_SECRET_KEY = '123qwe'
-    WTF_I18N_ENABLED = False    # 如果使用flask_wtf，就需要关闭wtforms使用flask的
+    WTF_I18N_ENABLED = False  # 如果使用flask_wtf，就需要关闭wtforms使用flask的
 
     # redis://:password@hostname:port/db_number
     CELERY_BROKER_URL = 'redis://:root123@localhost:6379/0'
