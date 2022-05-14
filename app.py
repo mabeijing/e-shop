@@ -2,6 +2,8 @@ import time
 
 from flask_cors import CORS
 from flask import Flask, session, request, url_for, render_template
+from flask_limiter import RateLimitExceeded
+
 from validate import FormatJsonValidate, UploadImageValidate
 from models import db
 from settings import DEV
@@ -10,9 +12,8 @@ from web_service import socket_io
 from api import api
 from exceptions import *
 from werkzeug.utils import secure_filename
-from flask_caching import Cache
 from flask_session import Session
-
+from utils import cache, limit
 
 app = Flask(__name__, static_folder='static')
 app.config.from_object(DEV)
@@ -24,8 +25,8 @@ ext.init_app(app)
 celery = ext.celery
 socket_io.init_app(app, cors_allowed_origins='*')
 
-cache = Cache()
 cache.init_app(app)
+limit.init_app(app)
 
 
 @app.route('/format_json')
@@ -68,6 +69,12 @@ def is_login():
         return
     if not session.get('user_id'):
         return UserNotLogin().serialize()
+
+
+@app.errorhandler(RateLimitExceeded)
+def error_handle(e):
+    print(1234)
+    return {'status_code': 40050, 'message': e.description}
 
 
 @app.errorhandler(HttpBaseException)

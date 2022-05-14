@@ -2,6 +2,13 @@ import time
 import uuid
 import hashlib
 from datetime import datetime
+from flask_caching import Cache
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+cache = Cache()
+
+limit = Limiter(key_func=get_remote_address)
 
 
 def get_now():

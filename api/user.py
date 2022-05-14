@@ -2,7 +2,7 @@ from flask import request, session, jsonify, url_for
 from exceptions import *
 from . import api
 from models import *
-from utils import get_now
+from utils import get_now, cache, limit
 
 
 @api.route('/user/register', methods=['POST'])
@@ -79,7 +79,13 @@ def user_delete(account):
     return {'status_code': 40000, 'message': f'{account}删除成功'}
 
 
+def make_cache_key_by_request():
+    return str(request.values.to_dict())
+
+
 @api.route('/user/login', methods=['POST'])
+@cache.cached(timeout=1, make_cache_key=make_cache_key_by_request)
+@limit.limit("1/second", override_defaults=False)
 def user_login():
     account = request.form.get('account')
     password = request.form.get('password')

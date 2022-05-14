@@ -35,6 +35,7 @@ class DEV:
     CACHE_REDIS_PORT = 6379
     CACHE_REDIS_PASSWORD = 'root123'
     CACHE_REDIS_DB = 10
+    CACHE_KEY_PREFIX = 'cache_endpoint_'
 
     WTF_CSRF_ENABLED = False
     WTF_CSRF_SECRET_KEY = '123qwe'
