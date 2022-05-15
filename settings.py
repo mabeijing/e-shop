@@ -20,15 +20,19 @@ conf = {'username': 'root',
 class DEV:
     DEBUG = True
     SECRET_KEY = '123'
+    JSON_AS_ASCII = False  # 开启中文
+
+    # sqlalchemy
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{username}:{password}@{host}:{port}/{database}'.format(**conf)
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # 动态追踪sql
     SQLALCHEMY_ECHO = False  # 显示sql
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
-    JSON_AS_ASCII = False  # 开启中文
 
+    # session
     SESSION_TYPE = 'redis'
     SESSION_KEY_PREFIX = "session:"
     SESSION_REDIS = redis.Redis(host='127.0.0.1', port='6379', password='root123')
+    SESSION_PERMANENT = False
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
     CACHE_TYPE = 'redis'
     CACHE_REDIS_HOST = '127.0.0.1'

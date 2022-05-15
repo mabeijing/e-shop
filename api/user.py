@@ -1,4 +1,4 @@
-from flask import request, session, jsonify, url_for
+from flask import request, session, jsonify, url_for, current_app
 from exceptions import *
 from . import api
 from models import *
@@ -100,9 +100,9 @@ def user_login():
         session['is_admin'] = user.administrator
         if remember_me:
             session.permanent = True
+        return user.serialize()
     else:
         raise UserBadAuthorized()
-    return user.serialize()
 
 
 @api.route('/user/logout', methods=['POST'])

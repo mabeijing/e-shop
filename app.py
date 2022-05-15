@@ -1,5 +1,3 @@
-import time
-
 from flask_cors import CORS
 from flask import Flask, session, request, url_for, render_template
 from flask_limiter import RateLimitExceeded
@@ -38,7 +36,6 @@ def format_json():
     image_form = UploadImageValidate(request.files)
     if not image_form.validate():
         return image_form.errors
-    time.sleep(2)
     headers = request.headers
     # if headers.get('Content-Type') != 'application/json':
     #     raise ContentTypeError(message='Content-Type必须是(application/json)')
@@ -64,6 +61,7 @@ def index():
 
 @app.before_request
 def is_login():
+    session.permanent = False
     white_list = [url_for('api.user_login'), url_for('api.user_register'), url_for('index')]
     if request.path in white_list:
         return
