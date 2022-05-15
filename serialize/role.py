@@ -4,6 +4,7 @@ from serialize.base_serialize import BaseSchema
 
 
 class RoleQuerySchema(BaseSchema):
+    """查询参数序列化"""
     class Meta:
         unknown = EXCLUDE
 
