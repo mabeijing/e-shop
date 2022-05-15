@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from serialize.role import RoleQuerySchema
 
 from utils import generate_uid
 
@@ -44,8 +45,9 @@ class BaseModel(db.Model):
     __abstract__ = True
     __table_args__ = {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, name='ID')
-    delete_flag = db.Column(db.Boolean, default=0, name='DELETE_FLAG')
+    delete_flag = db.Column(db.Boolean, default=False, name='DELETE_FLAG')
     create_time = db.Column(db.DateTime, default=datetime.now, name='CREATE_TIME')
+    update_time = db.Column(db.DateTime, onupdate=datetime.now, name='UPDATE_TIME')
 
     def save(self) -> bool:
         try:
@@ -66,22 +68,34 @@ class BaseModel(db.Model):
             raise e
 
     def serialize(self):
-        value = {}
+        serialize = self.__serialize__()
+        value = serialize.dumps(self, ensure_ascii=False)
+        return serialize.loads(value)
 
-        for column in [item for item in dir(self) if not (item.startswith('_') or item.startswith('__'))]:
-            attribute = getattr(self, column, None)
-            if attribute is None:
-                value[column.upper()] = None
-            else:
-                if isinstance(attribute, int):
-                    value[column.upper()] = attribute
-                if isinstance(attribute, (str, datetime)):
-                    value[column.upper()] = str(attribute)
-                if isinstance(attribute, bool):
-                    value[column.upper()] = attribute
 
-        value.pop('PASSWORD') if 'PASSWORD' in value.keys() else None
-        return value
+# class OperationRecord(BaseModel):
+#     """
+#     操作记录表
+#
+#     """
+#     __tablename__ = 'tb_operation_record'
+
+
+class Role(BaseModel):
+    """
+    角色和用户，一对多
+    """
+    __tablename__ = 'tb_role'
+    __serialize__ = RoleQuerySchema
+    role_id = db.Column(db.Integer, nullable=False, index=True, unique=True, name='ROLE_ID', comment='角色ID')
+    role_name = db.Column(db.String(32), nullable=False, unique=True, name='ROLE_NAME', comment='角色名字')
+    role_type = db.Column(db.Integer, nullable=False, unique=True, name='ROLE_TYPE', comment='角色类型')
+    role_description = db.Column(db.TEXT, default='', name='ROLE_DESCRIPTION', comment='角色描述')
+
+    users = db.relationship("User", backref=db.backref(__tablename__))
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(role_name={self.role_name})'
 
 
 class User(BaseModel):
@@ -105,6 +119,7 @@ class User(BaseModel):
 
     vip = db.relationship("Vip", backref=db.backref('tb_user'), uselist=False)
     address = db.relationship('Address', backref="user", lazy="dynamic")
+    role_id = db.Column(db.Integer, db.ForeignKey('tb_role.ROLE_ID'), unique=True, name='ROLE_ID', comment='外键ROLE_ID')
 
     @property
     def password(self):

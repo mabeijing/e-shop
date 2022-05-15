@@ -31,6 +31,8 @@ class DEV:
     SESSION_TYPE = 'redis'
     SESSION_KEY_PREFIX = "session:"
     SESSION_REDIS = redis.Redis(host='127.0.0.1', port='6379', password='root123')
+
+    # 设置false，表示cookie是session界别的，如果true，需要配合filetime一起生效。
     SESSION_PERMANENT = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

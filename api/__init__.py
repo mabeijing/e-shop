@@ -8,3 +8,4 @@ from .user import *
 from .address import *
 from .good_type import *
 from .vip import *
+from .role import *
