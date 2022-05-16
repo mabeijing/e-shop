@@ -1,6 +1,7 @@
 from flask_cors import CORS
 from flask import Flask, session, request, url_for, render_template
 from flask_limiter import RateLimitExceeded
+from marshmallow.exceptions import MarshmallowError
 
 from validate import FormatJsonValidate, UploadImageValidate
 from models import db
@@ -11,9 +12,10 @@ from api import api
 from exceptions import *
 from werkzeug.utils import secure_filename
 from flask_session import Session
-from utils import cache, limit
+from utils import cache, limit, FlaskJSONEncoder
 
 app = Flask(__name__, static_folder='static')
+app.json_encoder = FlaskJSONEncoder
 app.config.from_object(DEV)
 CORS(app)
 Session(app)
@@ -78,6 +80,11 @@ def error_handle(e):
 @app.errorhandler(HttpBaseException)
 def error_handle(e):
     return e.serialize()
+
+
+@app.errorhandler(MarshmallowError)
+def error_handle(e):
+    return {'status_code': 500, 'message': e.messages}
 
 
 @app.errorhandler(Exception)

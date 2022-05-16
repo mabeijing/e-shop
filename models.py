@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from serialize.role import RoleQuerySchema
+from serialize.role import RoleQuerySchema, UserQuerySchema
 
 from utils import generate_uid
 
@@ -100,6 +100,7 @@ class Role(BaseModel):
 
 class User(BaseModel):
     __tablename__ = 'tb_user'
+    __serialize__ = UserQuerySchema
     # __table_args__ = (
     #     db.UniqueConstraint('user_id', 'post_id', name='uix_user_post_user_id_post_id'),
     #     db.Index('ix_user_post_user_id_insert_time', 'user_id', 'insert_time')

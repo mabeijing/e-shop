@@ -1,14 +1,26 @@
 import time
 import uuid
 import hashlib
-from datetime import datetime
+from datetime import datetime, date
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+from flask.json import JSONEncoder
+
 cache = Cache()
 
 limit = Limiter(key_func=get_remote_address)
+
+
+class FlaskJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(obj, date):
+            return obj.strftime('%Y-%m-%d')
+        else:
+            return JSONEncoder.default(self, obj)
 
 
 def get_now():

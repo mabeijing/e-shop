@@ -28,7 +28,7 @@ def user_register():
         raise UserAlreadyExists()
     user = User(**data)
     user.save()
-    return user.serialize()
+    return jsonify(user.serialize())
 
 
 # string 不含/的任何字符

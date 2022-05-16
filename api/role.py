@@ -9,7 +9,5 @@ def role_list():
     roles = Role.query.all()
     if not roles:
         raise
-    # r = RoleQuerySchema().dumps(roles, ensure_ascii=False)
-    # print(r)
-    # print(roles.serialize())
+
     return jsonify([role.serialize() for role in roles])

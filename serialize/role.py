@@ -5,12 +5,29 @@ from serialize.base_serialize import BaseSchema
 
 class RoleQuerySchema(BaseSchema):
     """查询参数序列化"""
+
     class Meta:
         unknown = EXCLUDE
 
     role_id = fields.Int()
     role_name = fields.String()
     role_type = fields.String()
+
+
+class UserQuerySchema(BaseSchema):
+    class Meta:
+        unknown = EXCLUDE
+
+    user_id = fields.Str()
+    nick_name = fields.Str()
+    account = fields.Str()
+    avatar = fields.Str(allow_none=True)
+    age = fields.Int()
+    id_card = fields.Str()
+    gender = fields.Str()
+    login_time = fields.DateTime(allow_none=True)
+    balance = fields.Float()
+    # role_id = fields.Int()
 
 
 class ProjectQuerySchema(Schema):
