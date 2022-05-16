@@ -75,6 +75,11 @@ class AddressNotFound(AddressBaseException):
     message = '地址不存在'
 
 
+class UserParameterError(UserBaseException):
+    status_code = 40021
+    message = '参数错误'
+
+
 class GoodTypeNotFound(GoodTypeBaseException):
     status_code = 40030
     message = '货物分类不存在'

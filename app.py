@@ -1,17 +1,15 @@
-from flask_cors import CORS
 from flask import Flask, session, request, url_for, render_template
 from flask_limiter import RateLimitExceeded
 from marshmallow.exceptions import MarshmallowError
+from flask_session import Session
+from flask_cors import CORS
 
-from validate import FormatJsonValidate, UploadImageValidate
 from models import db
 from settings import DEV
 from tasks import ext
 from web_service import socket_io
 from api import api
 from exceptions import *
-from werkzeug.utils import secure_filename
-from flask_session import Session
 from utils import cache, limit, FlaskJSONEncoder
 
 app = Flask(__name__, static_folder='static')
@@ -32,19 +30,20 @@ limit.init_app(app)
 @app.route('/format_json')
 @cache.cached(timeout=2)
 def format_json():
-    data_form = FormatJsonValidate(request.form)
-    if not data_form.validate():
-        return data_form.errors
-    image_form = UploadImageValidate(request.files)
-    if not image_form.validate():
-        return image_form.errors
-    headers = request.headers
-    # if headers.get('Content-Type') != 'application/json':
-    #     raise ContentTypeError(message='Content-Type必须是(application/json)')
-
-    filename = secure_filename(image_form.file.data.filename)
-    image_form.file.data.save(filename)
-    return data_form.data
+    # data_form = FormatJsonValidate(request.form)
+    # if not data_form.validate():
+    #     return data_form.errors
+    # image_form = UploadImageValidate(request.files)
+    # if not image_form.validate():
+    #     return image_form.errors
+    # headers = request.headers
+    # # if headers.get('Content-Type') != 'application/json':
+    # #     raise ContentTypeError(message='Content-Type必须是(application/json)')
+    #
+    # filename = secure_filename(image_form.file.data.filename)
+    # image_form.file.data.save(filename)
+    # return data_form.data
+    return 'index'
 
 
 # with app.app_context():
@@ -73,7 +72,6 @@ def is_login():
 
 @app.errorhandler(RateLimitExceeded)
 def error_handle(e):
-    print(1234)
     return {'status_code': 40050, 'message': e.description}
 
 

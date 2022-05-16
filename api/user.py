@@ -3,30 +3,19 @@ from exceptions import *
 from . import api
 from models import *
 from utils import get_now, cache, limit
+from validate import UserFormValidate
 
 
 @api.route('/user/register', methods=['POST'])
 def user_register():
-    account = request.form.get('account')
-    admin = request.form.get('administrator')
-    flag = False
-    if str(admin) and (str(admin) == 'true' or str(admin) == 'True' or str(admin) == '1'):
-        flag = True
-    data = {
-        'account': account,
-        'password': request.form.get('password'),
-        'nick_name': request.form.get('nick_name'),
-        'age': request.form.get('age'),
-        'avatar': request.form.get('avatar'),
-        'id_card': request.form.get('id_card'),
-        'gender': request.form.get('gender'),
-        'balance': request.form.get('balance'),
-        'administrator': flag
-    }
-
-    if User.query.filter_by(account=account).first():
+    user_form = UserFormValidate(request.form)
+    if not user_form.validate():
+        raise UserParameterError(message=user_form.errors)
+    username = user_form.username.data
+    email = user_form.email.data
+    if User.query.filter(User.username == username or User.email == email).first():
         raise UserAlreadyExists()
-    user = User(**data)
+    user = User(**user_form.data)
     user.save()
     return jsonify(user.serialize())
 

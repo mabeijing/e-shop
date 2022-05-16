@@ -105,22 +105,19 @@ class User(BaseModel):
     #     db.UniqueConstraint('user_id', 'post_id', name='uix_user_post_user_id_post_id'),
     #     db.Index('ix_user_post_user_id_insert_time', 'user_id', 'insert_time')
     # )
-    user_id = db.Column(db.String(64), default=generate_uid, index=True, unique=True, name='USER_ID')
-    nick_name = db.Column(db.String(32), name='NICK_NAME')
-    account = db.Column(db.String(32), unique=True, nullable=False, name='ACCOUNT')
-    _password = db.Column(db.String(256), name='PASSWORD')
-    avatar = db.Column(db.String(256), name='AVATAR')
-    age = db.Column(db.Integer, name='AGE')
-    id_card = db.Column(db.String(28), name='ID_CARD')
-    gender = db.Column(db.String(2), name='GENDER')
-    login_time = db.Column(db.DateTime, name='LOGIN_TIME')
-    logout_time = db.Column(db.DateTime, name='LOGOUT_TIME')
-    balance = db.Column(db.FLOAT(10), name='BALANCE')
-    administrator = db.Column(db.Boolean, default=False, name='ADMINISTRATOR')
+    user_id = db.Column(db.String(64), default=generate_uid, index=True, unique=True, name='USER_ID', comment='用户ID')
+    nick_name = db.Column(db.String(32), name='NICK_NAME', comment='昵称')
+    email = db.Column(db.String(64), unique=True, nullable=False, name='EMAIL', comment='邮件')
+    username = db.Column(db.String(32), unique=True, nullable=False, name='USERNAME', comment='用户名')
+    _password = db.Column(db.String(256), nullable=False, name='PASSWORD', comment='密码')
+    avatar = db.Column(db.String(256), name='AVATAR', comment='头像缩略图')
+    age = db.Column(db.Integer, name='AGE', comment='年龄')
+    gender = db.Column(db.Enum('男', '女'), server_default='男', nullable=False, name='GENDER', comment='性别')
+    login_time = db.Column(db.DateTime, name='LOGIN_TIME', comment='最近一次登录时间')
 
-    vip = db.relationship("Vip", backref=db.backref('tb_user'), uselist=False)
     address = db.relationship('Address', backref="user", lazy="dynamic")
-    role_id = db.Column(db.Integer, db.ForeignKey('tb_role.ROLE_ID'), unique=True, name='ROLE_ID', comment='外键ROLE_ID')
+    role_id = db.Column(db.Integer, db.ForeignKey('tb_role.ROLE_ID'), nullable=False, name='ROLE_ID',
+                        comment='外键ROLE_ID')
 
     @property
     def password(self):
@@ -134,7 +131,7 @@ class User(BaseModel):
         return check_password_hash(self._password, pwd)
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(account={self.account})'
+        return f'{self.__class__.__name__}(username={self.username})'
 
 
 class Vip(BaseModel):
