@@ -20,6 +20,10 @@ class HttpBaseException(BasicException):
     pass
 
 
+class RoleBaseException(BasicException):
+    pass
+
+
 class UserBaseException(BasicException):
     pass
 
@@ -88,3 +92,13 @@ class GoodTypeNotFound(GoodTypeBaseException):
 class ContentTypeError(HttpBaseException):
     status_code = 40040
     message = 'Content-Type类型错误'
+
+
+class RoleParameterError(RoleBaseException):
+    status_code = 40050
+    message = '参数错误'
+
+
+class RoleNotFound(RoleBaseException):
+    status_code = 40051
+    message = 'role不存在'

@@ -12,6 +12,7 @@ class RoleQuerySchema(BaseSchema):
     role_id = fields.Int()
     role_name = fields.String()
     role_type = fields.String()
+    role_description = fields.Str()
 
 
 class UserQuerySchema(BaseSchema):
@@ -20,14 +21,14 @@ class UserQuerySchema(BaseSchema):
 
     user_id = fields.Str()
     nick_name = fields.Str()
-    account = fields.Str()
+    username = fields.Str()
     avatar = fields.Str(allow_none=True)
     age = fields.Int()
     id_card = fields.Str()
     gender = fields.Str()
     login_time = fields.DateTime(allow_none=True)
     balance = fields.Float()
-    # role_id = fields.Int()
+    role_id = fields.Int()
 
 
 class ProjectQuerySchema(Schema):

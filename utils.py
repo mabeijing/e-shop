@@ -5,12 +5,26 @@ from datetime import datetime, date
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from functools import wraps
 
 from flask.json import JSONEncoder
+from flask import session
+
+from exceptions import UserAccessNotAuthorized
 
 cache = Cache()
 
 limit = Limiter(key_func=get_remote_address)
+
+
+def is_administrator(fun):
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        if session.get('role_id') != 1:
+            raise UserAccessNotAuthorized()
+        return fun(*args, **kwargs)
+
+    return wrapper
 
 
 class FlaskJSONEncoder(JSONEncoder):

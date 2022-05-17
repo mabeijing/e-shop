@@ -1,5 +1,5 @@
-from wtforms import StringField, IntegerField, PasswordField
-from wtforms.validators import Length, NumberRange, Email, InputRequired
+from wtforms import StringField, IntegerField, PasswordField, BooleanField
+from wtforms.validators import Length, NumberRange, Email, InputRequired, DataRequired
 from flask_wtf.file import FileField, FileAllowed, FileRequired, FileSize
 
 from .base_validate import BaseFlaskForm, SensitiveFilter, GenderValidate
@@ -38,3 +38,17 @@ class UserAvatarValidate(BaseFlaskForm):
         FileRequired(message='文件不能为空'),
         FileAllowed(['jpg', 'png', 'jpeg', 'csv'], message='只支持[jpg,png,jpeg,csv]格式的文件上传'),
         FileSize(max_size=100 * 1024, message='最大支持100K')])
+
+
+class UserLoginValidate(BaseFlaskForm):
+    username = StringField(label='username', validators=[
+        DataRequired(message='用户名必填'),
+        Length(min=6, max=20, message='用户名长度6-20之间')
+    ])
+    password = PasswordField(label='password', validators=[
+        InputRequired(message='密码不能为空'),
+        Length(min=6, max=20, message='密码长度再6-20之间')
+    ])
+    remember_me = BooleanField(label='remember_me', validators=[
+
+    ])

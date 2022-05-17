@@ -92,7 +92,7 @@ class Role(BaseModel):
     role_type = db.Column(db.Integer, nullable=False, unique=True, name='ROLE_TYPE', comment='角色类型')
     role_description = db.Column(db.TEXT, default='', name='ROLE_DESCRIPTION', comment='角色描述')
 
-    users = db.relationship("User", backref=db.backref(__tablename__))
+    users = db.relationship("User", backref='role')
 
     def __repr__(self):
         return f'{self.__class__.__name__}(role_name={self.role_name})'
