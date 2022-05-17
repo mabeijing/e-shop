@@ -3,18 +3,6 @@ from marshmallow import Schema, fields, EXCLUDE
 from serialize.base_serialize import BaseSchema
 
 
-class RoleQuerySchema(BaseSchema):
-    """查询参数序列化"""
-
-    class Meta:
-        unknown = EXCLUDE
-
-    role_id = fields.Int()
-    role_name = fields.String()
-    role_type = fields.String()
-    role_description = fields.Str()
-
-
 class UserQuerySchema(BaseSchema):
     class Meta:
         unknown = EXCLUDE
@@ -29,6 +17,19 @@ class UserQuerySchema(BaseSchema):
     login_time = fields.DateTime(allow_none=True)
     balance = fields.Float()
     role_id = fields.Int()
+
+
+class RoleQuerySchema(BaseSchema):
+    """查询参数序列化"""
+
+    class Meta:
+        unknown = EXCLUDE
+
+    role_id = fields.Int()
+    role_name = fields.String()
+    role_type = fields.String()
+    role_description = fields.Str()
+    users_list = fields.List(fields.Dict())
 
 
 class ProjectQuerySchema(Schema):

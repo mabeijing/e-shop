@@ -94,6 +94,12 @@ class Role(BaseModel):
 
     users = db.relationship("User", backref='role')
 
+    @property
+    def users_list(self):
+        roles_schema = UserQuerySchema(many=True)
+        rs = roles_schema.dumps(self.users, ensure_ascii=False)
+        return json.loads(rs)
+
     def __repr__(self):
         return f'{self.__class__.__name__}(role_name={self.role_name})'
 
@@ -118,6 +124,16 @@ class User(BaseModel):
     address = db.relationship('Address', backref="user", lazy="dynamic")
     role_id = db.Column(db.Integer, db.ForeignKey('tb_role.ROLE_ID'), nullable=False, name='ROLE_ID',
                         comment='外键ROLE_ID')
+
+    def __iter__(self):
+        self._n = 1
+        return self
+
+    def __next__(self):
+        if self._n == 1:
+            return 'fun'
+        else:
+            raise StopIteration
 
     @property
     def password(self):

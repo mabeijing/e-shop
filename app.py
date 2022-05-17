@@ -85,10 +85,10 @@ def error_handle(e):
     return {'status_code': 500, 'message': e.messages}
 
 
-@app.errorhandler(Exception)
-def error_handle(e: Exception):
-    print(e)
-    return {'status_code': 500, 'message': '服务器内部错误'}
+# @app.errorhandler(Exception)
+# def error_handle(e: Exception):
+#     print(e)
+#     return {'status_code': 500, 'message': '服务器内部错误'}
 
 
 if __name__ == '__main__':
