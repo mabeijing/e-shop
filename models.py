@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from serialize.role import RoleQuerySchema, UserQuerySchema
+from serialize.role import RoleQuerySchema, UserQuerySchema, RoleQuery, UserQuery
 
 from utils import generate_uid
 
@@ -96,8 +96,8 @@ class Role(BaseModel):
 
     @property
     def users_list(self):
-        roles_schema = UserQuerySchema(many=True)
-        rs = roles_schema.dumps(self.users, ensure_ascii=False)
+        users_schema = UserQuery(many=True)
+        rs = users_schema.dumps(self.users, ensure_ascii=False)
         return json.loads(rs)
 
     def __repr__(self):
@@ -125,15 +125,11 @@ class User(BaseModel):
     role_id = db.Column(db.Integer, db.ForeignKey('tb_role.ROLE_ID'), nullable=False, name='ROLE_ID',
                         comment='外键ROLE_ID')
 
-    def __iter__(self):
-        self._n = 1
-        return self
-
-    def __next__(self):
-        if self._n == 1:
-            return 'fun'
-        else:
-            raise StopIteration
+    @property
+    def _role(self):
+        role_schema = RoleQuery()
+        rs = role_schema.dumps(self.role, ensure_ascii=False)
+        return json.loads(rs)
 
     @property
     def password(self):

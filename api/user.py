@@ -37,7 +37,6 @@ def user_detail(username):
     user = User.query.filter_by(username=username).first()
     if not user:
         raise UserNotFound(message=f'{username}用户不存在')
-    print(user.role.role_name)
     return jsonify(user.serialize())
 
 
