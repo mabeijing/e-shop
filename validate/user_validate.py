@@ -34,7 +34,7 @@ class UserFormValidate(BaseFlaskForm):
 
 
 class UserAvatarValidate(BaseFlaskForm):
-    avatar = FileField(label='image', validators=[
+    avatar = FileField(label='avatar', validators=[
         FileRequired(message='文件不能为空'),
         FileAllowed(['jpg', 'png', 'jpeg', 'csv'], message='只支持[jpg,png,jpeg,csv]格式的文件上传'),
         FileSize(max_size=100 * 1024, message='最大支持100K')])

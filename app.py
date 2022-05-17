@@ -27,25 +27,6 @@ cache.init_app(app)
 limit.init_app(app)
 
 
-@app.route('/format_json')
-@cache.cached(timeout=2)
-def format_json():
-    # data_form = FormatJsonValidate(request.form)
-    # if not data_form.validate():
-    #     return data_form.errors
-    # image_form = UploadImageValidate(request.files)
-    # if not image_form.validate():
-    #     return image_form.errors
-    # headers = request.headers
-    # # if headers.get('Content-Type') != 'application/json':
-    # #     raise ContentTypeError(message='Content-Type必须是(application/json)')
-    #
-    # filename = secure_filename(image_form.file.data.filename)
-    # image_form.file.data.save(filename)
-    # return data_form.data
-    return 'index'
-
-
 # with app.app_context():
 #     db.init_app(app)
 #     db.create_all()

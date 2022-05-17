@@ -74,6 +74,11 @@ class UserNotAdmin(UserBaseException):
     message = '非管理员无法操作'
 
 
+class FileNotFound(UserBaseException):
+    status_code = 40016
+    message = '上传的文件不存在'
+
+
 class AddressNotFound(AddressBaseException):
     status_code = 40020
     message = '地址不存在'

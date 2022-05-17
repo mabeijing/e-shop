@@ -1,9 +1,11 @@
 from flask import request, session, jsonify
-from exceptions import *
+from werkzeug.utils import secure_filename
+
 from . import api
 from models import *
 from utils import get_now, cache, limit, is_administrator
 from validate import *
+from exceptions import *
 
 
 @api.route('/user/register', methods=['POST'])
@@ -49,6 +51,27 @@ def user_edit(username: str):
     age = request.form.get('age')
     user.age = age
     user.save()
+    return jsonify(user.serialize())
+
+
+@api.route('/user/avatar', methods=['POST'])
+def user_avatar():
+    file_form = UserAvatarValidate(request.files)
+    if not file_form.validate():
+        raise FileNotFound(message=file_form.errors)
+    filename = secure_filename(file_form.avatar.data.filename)
+    avatar_path = '/static/uploads/' + filename
+    file_form.avatar.data.save('static/uploads/'+filename)
+
+    user_id = session.get('user_id')
+    try:
+        User.query.filter_by(user_id=user_id).update({'avatar': avatar_path})
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e from Exception
+
+    user = User.query.filter_by(user_id=user_id).first()
     return jsonify(user.serialize())
 
 
