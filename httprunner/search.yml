@@ -1,0 +1,29 @@
+# author: ducker
+
+config:
+    name: "product_search_operate"
+    base_url: "http://10.148.61.40"
+    verify: False
+
+teststeps:
+    -   name: "/api/gcc/product/search"
+        variables:
+            page: 1
+            pageSize: 9
+            searchName: "test"
+            userName: ""
+            statuses: [ ]
+            session: "${session_id}"
+            productName: "Gitlab Product 1650342175"
+        request:
+            method: POST
+            url: /api/gcc/product/search
+            json: { page: $page,pageSize: $pageSize,searchName: "${searchName}",userName: "",productName: "${productName}" ,statuses: [ ] }
+            headers:
+                session: ${session}
+                User-Agent: HttpRunner/${get_httprunner_version()}
+        extract:
+            session_id: "body.session_id"
+        validate:
+            -   eq: [ "status_code", 200 ]
+            -   eq: [ "body.data.rows[0].productName", "${productName}" ]

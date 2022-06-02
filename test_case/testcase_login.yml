@@ -1,0 +1,16 @@
+# author: ducker
+# testcase: quote a real request tml
+# export: must extract in request yml and can put variable to global_scope
+
+config:
+    name: "login1"
+    base_url: "http://10.148.61.40"
+    verify: False
+
+teststeps:
+    -   name: login
+        testcase: userlogin.yml
+        export: [ session ]
+
+    -   name: search product
+        testcase: search.yml

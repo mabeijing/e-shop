@@ -94,9 +94,9 @@ def _make_cache_key_by_request():
 @cache.cached(timeout=1, make_cache_key=_make_cache_key_by_request)
 @limit.limit("1/second", override_defaults=False)
 def user_login():
-    user_form = UserLoginValidate(request.form)
+    user_form = UserLoginValidate(request.json)
     if not user_form.validate():
-        raise UserParameterError(user_form.errors)
+        raise UserParameterError(message=user_form.errors)
     user = User.query.filter_by(username=user_form.username.data).first()
     if not user:
         raise UserNotFound()

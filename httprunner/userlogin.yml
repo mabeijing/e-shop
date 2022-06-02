@@ -1,0 +1,27 @@
+# author: ducker
+
+config:
+    name: "login_operate"
+    variables:
+        global_username: "test"
+        global_password: "@WSX3edc"
+    base_url: "http://10.148.61.40"
+    verify: False
+
+teststeps:
+    -   name: "/api/rs/user/userlogin"
+        variables:
+            username: "${global_username}"
+            password: "${global_password}"
+        request:
+            method: POST
+            url: /api/rs/user/userlogin
+            json: { username: "${username}",password: "${password}" }
+            headers:
+                User-Agent: HttpRunner/${get_httprunner_version()}
+        extract:
+            session_id: "body.session_id"
+        validate:
+            -   eq: [ "status_code", 200 ]
+            -   eq: [ "body.username", "${username}" ]
+
