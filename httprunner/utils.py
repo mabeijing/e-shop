@@ -7,9 +7,8 @@ import os.path
 import platform
 import uuid
 from multiprocessing import Queue
-from typing import Any, Dict, List, Text
+from typing import Any, Dict, List
 
-import requests
 import sentry_sdk
 from loguru import logger
 
@@ -26,60 +25,60 @@ def init_sentry_sdk():
         scope.set_user({"id": uuid.getnode()})
 
 
-class GAClient(object):
-
-    version = '1'   # GA API Version
-    report_url = 'https://www.google-analytics.com/collect'
-    report_debug_url = 'https://www.google-analytics.com/debug/collect'   # used for debug
-
-    def __init__(self, tracking_id: Text):
-        self.http_client = requests.Session()
-        self.label = f"v{__version__}"
-        self.common_params = {
-            'v': self.version,
-            'tid': tracking_id,    # Tracking ID / Property ID, XX-XXXXXXX-X
-            'cid': uuid.getnode(),      # Anonymous Client ID
-            'ua': f'HttpRunner/{__version__}',
-        }
-        # do not send GA events in CI environment
-        self.__is_ci = os.getenv("DISABLE_GA") == "true"
-
-    def track_event(self, category: Text, action: Text, value: int = 0):
-        if self.__is_ci:
-            return
-
-        data = {
-            't': 'event',       # Event hit type = event
-            'ec': category,     # Required. Event Category.
-            'ea': action,       # Required. Event Action.
-            'el': self.label,   # Optional. Event label, used as version.
-            'ev': value,        # Optional. Event value, must be non-negative integer
-        }
-        data.update(self.common_params)
-        try:
-            self.http_client.post(self.report_url, data=data, timeout=5)
-        except Exception:   # ProxyError, SSLError, ConnectionError
-            pass
-
-    def track_user_timing(self, category: Text, variable: Text, duration: int):
-        if self.__is_ci:
-            return
-
-        data = {
-            't': 'timing',      # Event hit type = timing
-            'utc': category,    # Required. user timing category. e.g. jsonLoader
-            'utv': variable,    # Required. timing variable. e.g. load
-            'utt': duration,    # Required. time took duration.
-            'utl': self.label,  # Optional. user timing label, used as version.
-        }
-        data.update(self.common_params)
-        try:
-            self.http_client.post(self.report_url, data=data, timeout=5)
-        except Exception:   # ProxyError, SSLError, ConnectionError
-            pass
-
-
-ga_client = GAClient("UA-114587036-1")
+# class GAClient(object):
+#
+#     version = '1'   # GA API Version
+#     report_url = 'https://www.google-analytics.com/collect'
+#     report_debug_url = 'https://www.google-analytics.com/debug/collect'   # used for debug
+#
+#     def __init__(self, tracking_id: Text):
+#         self.http_client = requests.Session()
+#         self.label = f"v{__version__}"
+#         self.common_params = {
+#             'v': self.version,
+#             'tid': tracking_id,    # Tracking ID / Property ID, XX-XXXXXXX-X
+#             'cid': uuid.getnode(),      # Anonymous Client ID
+#             'ua': f'HttpRunner/{__version__}',
+#         }
+#         # do not send GA events in CI environment
+#         self.__is_ci = os.getenv("DISABLE_GA") == "true"
+#
+#     def track_event(self, category: Text, action: Text, value: int = 0):
+#         if self.__is_ci:
+#             return
+#
+#         data = {
+#             't': 'event',       # Event hit type = event
+#             'ec': category,     # Required. Event Category.
+#             'ea': action,       # Required. Event Action.
+#             'el': self.label,   # Optional. Event label, used as version.
+#             'ev': value,        # Optional. Event value, must be non-negative integer
+#         }
+#         data.update(self.common_params)
+#         try:
+#             self.http_client.post(self.report_url, data=data, timeout=5)
+#         except Exception:   # ProxyError, SSLError, ConnectionError
+#             pass
+#
+#     def track_user_timing(self, category: Text, variable: Text, duration: int):
+#         if self.__is_ci:
+#             return
+#
+#         data = {
+#             't': 'timing',      # Event hit type = timing
+#             'utc': category,    # Required. user timing category. e.g. jsonLoader
+#             'utv': variable,    # Required. timing variable. e.g. load
+#             'utt': duration,    # Required. time took duration.
+#             'utl': self.label,  # Optional. user timing label, used as version.
+#         }
+#         data.update(self.common_params)
+#         try:
+#             self.http_client.post(self.report_url, data=data, timeout=5)
+#         except Exception:   # ProxyError, SSLError, ConnectionError
+#             pass
+#
+#
+# ga_client = GAClient("UA-114587036-1")
 
 
 def set_os_environ(variables_mapping):
@@ -251,7 +250,7 @@ class ExtendJSONEncoder(json.JSONEncoder):
 
 
 def merge_variables(
-    variables: VariablesMapping, variables_to_be_overridden: VariablesMapping
+        variables: VariablesMapping, variables_to_be_overridden: VariablesMapping
 ) -> VariablesMapping:
     """ merge two variables mapping, the first variables have higher priority
     """

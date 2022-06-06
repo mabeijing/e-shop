@@ -25,7 +25,7 @@ def _load_yaml_file(yaml_file: Text) -> Dict:
         except yaml.YAMLError as ex:
             err_msg = f"YAMLError:\nfile: {yaml_file}\nerror: {ex}"
             logger.error(err_msg)
-            raise exceptions.FileFormatError
+            raise exceptions.FileFormatError from yaml.YAMLError
 
         return yaml_content
 
@@ -38,7 +38,7 @@ def _load_json_file(json_file: Text) -> Dict:
             json_content = json.load(data_file)
         except json.JSONDecodeError as ex:
             err_msg = f"JSONDecodeError:\nfile: {json_file}\nerror: {ex}"
-            raise exceptions.FileFormatError(err_msg)
+            raise exceptions.FileFormatError(err_msg) from json.JSONDecodeError
 
         return json_content
 
@@ -68,7 +68,7 @@ def load_testcase(testcase: Dict) -> TestCase:
         testcase_obj = TestCase.parse_obj(testcase)
     except ValidationError as ex:
         err_msg = f"TestCase ValidationError:\nerror: {ex}\ncontent: {testcase}"
-        raise exceptions.TestCaseFormatError(err_msg)
+        raise exceptions.TestCaseFormatError(err_msg) from ValidationError
 
     return testcase_obj
 
@@ -447,11 +447,11 @@ def convert_relative_project_root_dir(abs_path: Text) -> Text:
 
 
 if __name__ == '__main__':
-    files = load_folder_files(r'C:\Users\ducker\yapi')
-    print(files)
-    import functions
+    # print(_load_yaml_file(r'userlogin.yml'))
+    import requests
 
-    m = load_module_functions(functions)
-    print(m)
-    gen_random_string = m['gen_random_string']
-    print(gen_random_string)
+    import time
+    t1 = time.time_ns()
+    print(t1)
+    print(load_module_functions(requests))
+    print(time.time_ns())
