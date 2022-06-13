@@ -108,6 +108,7 @@ def type_match(check_value: Any, expect_value: Any, message: Text = ""):
                 raise ValueError(name)
         else:
             raise ValueError(name)
+
     if expect_value in ["None", "NoneType", None]:
         assert check_value is None, message
     else:

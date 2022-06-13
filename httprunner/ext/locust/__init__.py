@@ -70,8 +70,6 @@ def prepare_locust_tests() -> List:
 def main_locusts():
     """ locusts entrance
     """
-    from httprunner.utils import ga_client
-    ga_client.track_event("RunLoadTests", "locust")
 
     # avoid print too much log details in console
     logger.remove()

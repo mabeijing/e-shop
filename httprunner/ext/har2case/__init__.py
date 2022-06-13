@@ -10,7 +10,6 @@ Usage:
 """
 
 from httprunner.ext.har2case.core import HarParser
-from httprunner.utils import ga_client
 
 
 def init_har2case_parser(subparsers):
@@ -43,7 +42,7 @@ def init_har2case_parser(subparsers):
     parser.add_argument(
         "--exclude",
         help="Specify exclude keyword, url that includes exclude string will be ignored, "
-        "multiple keywords can be joined with '|'",
+             "multiple keywords can be joined with '|'",
     )
     parser.add_argument(
         "--profile",
@@ -64,7 +63,6 @@ def main_har2case(args):
     else:
         output_file_type = "pytest"
 
-    ga_client.track_event("ConvertTests", f"har2case {output_file_type}")
     HarParser(har_source_file, args.filter, args.exclude, args.profile).gen_testcase(output_file_type)
 
     return 0

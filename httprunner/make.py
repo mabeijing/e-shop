@@ -14,8 +14,7 @@ from httprunner.loader import (convert_relative_project_root_dir,
                                load_folder_files, load_project_meta,
                                load_test_file, load_testcase, load_testsuite)
 from httprunner.response import uniform_validator
-from httprunner.utils import (ga_client, is_support_multiprocessing,
-                              merge_variables)
+from httprunner.utils import is_support_multiprocessing, merge_variables
 from httprunner.templete import __TEMPLATE__
 
 """ cache converted pytest files, avoid duplicate making
@@ -541,8 +540,6 @@ def __make(tests_path: Text):
 def main_make(tests_paths: List[Text]) -> List[Text]:
     if not tests_paths:
         return []
-
-    # ga_client.track_event("ConvertTests", "hmake")
 
     for tests_path in tests_paths:
         tests_path = ensure_path_sep(tests_path)

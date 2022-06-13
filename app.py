@@ -1,4 +1,6 @@
-from flask import Flask, session, request, url_for, render_template
+import time
+
+from flask import Flask, session, request, url_for, render_template, jsonify
 from flask_limiter import RateLimitExceeded
 from marshmallow.exceptions import MarshmallowError
 from flask_session import Session
@@ -38,7 +40,9 @@ limit.init_app(app)
 
 @app.route('/index')
 def index():
-    return render_template('websocket_demo.html')
+    time.sleep(1)
+    # return render_template('websocket_demo.html')
+    return jsonify({'name': 'vmware'})
 
 
 @app.before_request
@@ -73,5 +77,5 @@ def error_handle(e):
 
 
 if __name__ == '__main__':
-    # app.run()
-    socket_io.run(app)
+    app.run()
+    # socket_io.run(app)

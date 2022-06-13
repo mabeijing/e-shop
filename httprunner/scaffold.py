@@ -1,10 +1,11 @@
+"""
+用于生成demo和项目结构
+"""
 import os.path
 import subprocess
 import sys
 
 from loguru import logger
-
-from httprunner.utils import ga_client
 
 
 def init_parser_scaffold(subparsers):
@@ -200,5 +201,4 @@ def sleep(n_secs):
 
 
 def main_scaffold(args):
-    ga_client.track_event("Scaffold", "startproject")
     sys.exit(create_scaffold(args.project_name))
