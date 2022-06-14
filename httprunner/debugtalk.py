@@ -1,3 +1,5 @@
+# user define function
+
 import time
 from typing import Sequence, Union, NoReturn
 
@@ -19,9 +21,3 @@ def sum_sequence(args: Sequence[int]) -> int:
 
 def join_sequence(sequence: Sequence[str]) -> str:
     return "".join(sequence)
-
-
-if __name__ == '__main__':
-    # sum_ints((1, 2, 3, 4))
-    sum_sequence([1, 2, 3, 4])
-    join_sequence(['a', 'b'])

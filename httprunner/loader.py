@@ -4,11 +4,12 @@ import json
 import os
 import sys
 import types
-from typing import Callable, Dict, List, Text, Tuple, Optional
+from typing import Callable, Dict, List, Text, Tuple, Optional, Mapping
 from _types import FuncMapping
 import yaml
 from loguru import logger
 from pydantic import ValidationError
+from pathlib import Path
 
 from httprunner import builtin, exceptions, utils
 from httprunner.models import ProjectMeta, TestCase, TestSuite
@@ -16,7 +17,7 @@ from httprunner.models import ProjectMeta, TestCase, TestSuite
 project_meta: Optional[ProjectMeta] = None
 
 
-def _load_yaml_file(yaml_file: Text) -> Dict:
+def _load_yaml_file(yaml_file: Path) -> Dict:
     """ load yaml file and check file content format
     """
     with open(yaml_file, mode="rb") as stream:
@@ -30,7 +31,7 @@ def _load_yaml_file(yaml_file: Text) -> Dict:
         return yaml_content
 
 
-def _load_json_file(json_file: Text) -> Dict:
+def _load_json_file(json_file: Path) -> Dict:
     """ load json file and check file content format
     """
     with open(json_file, mode="rb") as data_file:
@@ -43,15 +44,14 @@ def _load_json_file(json_file: Text) -> Dict:
         return json_content
 
 
-def load_test_file(test_file: Text) -> Dict:
+def load_test_file(test_file: Path) -> Dict:
     """load testcase/testsuite file content"""
-    if not os.path.isfile(test_file):
+    if not test_file.is_file():
         raise exceptions.FileNotFound(f"test file not exists: {test_file}")
 
-    file_suffix = os.path.splitext(test_file)[1].lower()
-    if file_suffix == ".json":
+    if test_file.suffix.lower() == ".json":
         test_file_content = _load_json_file(test_file)
-    elif file_suffix in [".yaml", ".yml"]:
+    elif test_file.suffix.lower() in [".yaml", ".yml"]:
         test_file_content = _load_yaml_file(test_file)
     else:
         # '' or other suffix
@@ -82,7 +82,7 @@ def load_testcase_file(testcase_file: Text) -> TestCase:
 
 
 def load_testsuite(testsuite: Dict) -> TestSuite:
-    path = testsuite["config"]["path"]
+    path: Path = testsuite["config"]["path"]
     try:
         # validate with pydantic TestCase model
         testsuite_obj = TestSuite.parse_obj(testsuite)
@@ -185,7 +185,7 @@ def load_csv_file(csv_file: Text) -> List[Dict]:
     return csv_content_list
 
 
-def load_folder_files(folder_path: Text, recursive: bool = True) -> List:
+def load_folder_files(folder_path: Path, recursive: bool = True) -> List:
     """ load folder path, return all files endswith .yml/.yaml/.json/_test.py in list.
 
     Args:
@@ -255,7 +255,7 @@ def load_builtin_functions() -> FuncMapping:
     return load_module_functions(builtin)
 
 
-def locate_file(start_path: Text, file_name: Text) -> Text:
+def locate_file(start_path: Path, file_name: Text) -> Path:
     """ locate filename and return absolute file path.
         searching will be recursive upward until system root dir.
 
@@ -271,21 +271,17 @@ def locate_file(start_path: Text, file_name: Text) -> Text:
 
     """
     if os.path.isfile(start_path):
-        start_dir_path = os.path.dirname(start_path)
+        start_dir_path: Path = start_path.cwd()
     elif os.path.isdir(start_path):
-        start_dir_path = start_path
+        start_dir_path: Path = start_path
     else:
         raise exceptions.FileNotFound(f"invalid path: {start_path}")
 
-    file_path = os.path.join(start_dir_path, file_name)
-    if os.path.isfile(file_path):
-        # ensure absolute
-        return os.path.abspath(file_path)
+    file_path: Path = start_path.joinpath(file_name)
+    if file_path.is_file():
+        return file_path.absolute()
 
-    # system root dir
-    # Windows, e.g. 'E:\\'
-    # Linux/Darwin, '/'
-    parent_dir = os.path.dirname(start_dir_path)
+    parent_dir: Path = start_dir_path.parent
     if parent_dir == start_dir_path:
         raise exceptions.FileNotFound(f"{file_name} not found in {start_path}")
 
@@ -293,7 +289,7 @@ def locate_file(start_path: Text, file_name: Text) -> Text:
     return locate_file(parent_dir, file_name)
 
 
-def locate_debugtalk_py(start_path: Text) -> Text:
+def locate_debugtalk_py(start_path: Path) -> Path:
     """ locate debugtalk.py file
 
     Args:
@@ -306,14 +302,14 @@ def locate_debugtalk_py(start_path: Text) -> Text:
     """
     try:
         # locate debugtalk.py file.
-        debugtalk_path = locate_file(start_path, "debugtalk.py")
+        debugtalk_path: Path = locate_file(start_path, "debugtalk.py")
     except exceptions.FileNotFound:
-        debugtalk_path = None
+        debugtalk_path = Path()
 
     return debugtalk_path
 
 
-def locate_project_root_directory(test_path: Text) -> Tuple[Text, Text]:
+def locate_project_root_directory(test_path: Path) -> Tuple[Path, Path]:
     """ locate debugtalk.py path as project root directory
 
     Args:
@@ -324,28 +320,15 @@ def locate_project_root_directory(test_path: Text) -> Tuple[Text, Text]:
 
     """
 
-    def prepare_path(path):
-        if not os.path.exists(path):
-            err_msg = f"path not exist: {path}"
-            logger.error(err_msg)
-            raise exceptions.FileNotFound(err_msg)
-
-        if not os.path.isabs(path):
-            path = os.path.join(os.getcwd(), path)
-
-        return path
-
-    test_path = prepare_path(test_path)
+    if not test_path.exists():
+        err_msg = f"path not exist: {test_path}"
+        logger.error(err_msg)
+        raise exceptions.FileNotFound(err_msg)
 
     # locate debugtalk.py file
-    debugtalk_path = locate_debugtalk_py(test_path)
+    debugtalk_path: Path = locate_debugtalk_py(test_path)
 
-    if debugtalk_path:
-        # The folder contains debugtalk.py will be treated as project RootDir.
-        project_root_directory = os.path.dirname(debugtalk_path)
-    else:
-        # debugtalk.py not found, use os.getcwd() as project RootDir.
-        project_root_directory = os.getcwd()
+    project_root_directory: Path = debugtalk_path.absolute().parent
 
     return debugtalk_path, project_root_directory
 
@@ -374,7 +357,7 @@ def load_debugtalk_functions() -> Dict[Text, Callable]:
     return load_module_functions(imported_module)
 
 
-def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
+def load_project_meta(test_path: Path, reload: bool = False) -> ProjectMeta:
     """ load testcases, .env, debugtalk.py functions.
         testcases folder is relative to project_root_directory
         by default, project_meta will be loaded only once, unless set reload to true.
@@ -400,7 +383,7 @@ def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
     debugtalk_path, project_root_directory = locate_project_root_directory(test_path)
 
     # add project RootDir to sys.path
-    sys.path.insert(0, project_root_directory)
+    sys.path.insert(0, str(project_root_directory))
 
     # load .env file
     # NOTICE:
@@ -426,7 +409,7 @@ def load_project_meta(test_path: Text, reload: bool = False) -> ProjectMeta:
     return project_meta
 
 
-def convert_relative_project_root_dir(abs_path: Text) -> Text:
+def convert_relative_project_root_dir(abs_path: Path) -> Path:
     """ convert absolute path to relative path, based on project_meta.RootDir
 
     Args:
@@ -436,14 +419,14 @@ def convert_relative_project_root_dir(abs_path: Text) -> Text:
 
     """
     _project_meta = load_project_meta(abs_path)
-    if not abs_path.startswith(_project_meta.RootDir):
+    if not abs_path.is_relative_to(_project_meta.RootDir):
         raise exceptions.ParamsError(
             f"failed to convert absolute path to relative path based on project_meta.RootDir\n"
             f"abs_path: {abs_path}\n"
             f"project_meta.RootDir: {_project_meta.RootDir}"
         )
 
-    return abs_path[len(_project_meta.RootDir) + 1:]
+    return abs_path.relative_to(_project_meta.RootDir)
 
 
 if __name__ == '__main__':
@@ -451,6 +434,7 @@ if __name__ == '__main__':
     import requests
 
     import time
+
     t1 = time.time_ns()
     print(t1)
     print(load_module_functions(requests))

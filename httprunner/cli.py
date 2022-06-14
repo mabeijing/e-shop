@@ -1,38 +1,32 @@
-import argparse
+"""
+命令行启动参数
+需要完成 生成脚本，并且执行
+"""
+import typing
 import enum
-import os
+from httprunner import __BASE_PATH__
 import sys
-
 import pytest
 from loguru import logger
 
-from httprunner import __description__, __version__
-from httprunner.compat import ensure_cli_args
-from httprunner.ext.har2case import init_har2case_parser, main_har2case
-from httprunner.make import init_make_parser, main_make
-from httprunner.scaffold import init_parser_scaffold, main_scaffold
+from httprunner import __version__
+
+from httprunner.make import main_make
+
+if typing.TYPE_CHECKING:
+    from pathlib import Path
 
 
-def init_parser_run(subparsers):
-    sub_parser_run = subparsers.add_parser(
-        "run", help="Make HttpRunner testcases and run with pytest."
-    )
-    return sub_parser_run
-
-
-def main_run(extra_args: list) -> enum.IntEnum:
-    # keep compatibility with v2
-    # extra_args = ensure_cli_args(extra_args)
-    tests_path_list = []
-    extra_args_new = []
+def run(extra_args: list) -> enum.IntEnum:
+    tests_path_list: list[Path] = []
+    extra_args_new: list[str] = []
     for item in extra_args:
         item: str
-        if not os.path.exists(item):
-            # item is not file/folder path
-            extra_args_new.append(item)
+        _path: Path = __BASE_PATH__.joinpath('resource', item)
+        if _path.exists():
+            tests_path_list.append(_path)
         else:
-            # item is file/folder path
-            tests_path_list.append(item)
+            extra_args_new.append(item)
 
     if len(tests_path_list) == 0:
         # has not specified any testcase path
@@ -52,107 +46,9 @@ def main_run(extra_args: list) -> enum.IntEnum:
     return pytest.main(extra_args_new)
 
 
-def main():
-    """ API test: parse command line options and run commands.
-    """
-    parser = argparse.ArgumentParser(description=__description__, add_help=False)
-    parser.add_argument("-V", "--version", dest="version", action="store_true", help="show version")
-
-    subparsers = parser.add_subparsers(help="sub-command help")
-    subparsers.add_parser("run", help="Make HttpRunner testcases and run with pytest.")
-    # sub_parser_run = init_parser_run(subparsers)
-    sub_parser_scaffold = init_parser_scaffold(subparsers)
-    sub_parser_har2case = init_har2case_parser(subparsers)
-    sub_parser_make = init_make_parser(subparsers)
-    print(sys.argv)
-    if len(sys.argv) == 1:
-        # httprunner
-        parser.print_help()
-        sys.exit(0)
-    elif len(sys.argv) == 2:
-        # print help for sub-commands
-        if sys.argv[1] in ["-V", "--version"]:
-            # httprunner -V
-            print(f"{__version__}")
-        elif sys.argv[1] in ["-h", "--help"]:
-            # httprunner -h
-            parser.print_help()
-        elif sys.argv[1] == "startproject":
-            # httprunner startproject
-            sub_parser_scaffold.print_help()
-        elif sys.argv[1] == "har2case":
-            # httprunner har2case
-            sub_parser_har2case.print_help()
-        elif sys.argv[1] == "run":
-            # httprunner run
-            pytest.main(["-h"])
-        elif sys.argv[1] == "make":
-            # httprunner make
-            sub_parser_make.print_help()
-        sys.exit(0)
-    elif (
-            len(sys.argv) == 3 and sys.argv[1] == "run" and sys.argv[2] in ["-h", "--help"]
-    ):
-        # httprunner run -h
-        pytest.main(["-h"])
-        sys.exit(0)
-
-    extra_args = []
-    if len(sys.argv) >= 2 and sys.argv[1] in ["run", "locusts"]:
-        args, extra_args = parser.parse_known_args()
-    else:
-        args = parser.parse_args()
-
-    if args.version:
-        print(f"{__version__}")
-        sys.exit(0)
-
-    if sys.argv[1] == "run":
-        print(extra_args)
-        sys.exit(main_run(extra_args))
-    elif sys.argv[1] == "startproject":
-        main_scaffold(args)
-    elif sys.argv[1] == "har2case":
-        main_har2case(args)
-    elif sys.argv[1] == "make":
-        main_make(args.testcase_path)
-
-
-def main_hrun_alias():
-    """ command alias
-        hrun = httprunner run
-    """
-    if len(sys.argv) == 2:
-        if sys.argv[1] in ["-V", "--version"]:
-            # hrun -V
-            sys.argv = ["httprunner", "-V"]
-        elif sys.argv[1] in ["-h", "--help"]:
-            pytest.main(["-h"])
-            sys.exit(0)
-        else:
-            # hrun /path/to/testcase
-            sys.argv.insert(1, "run")
-    else:
-        sys.argv.insert(1, "run")
-
-    main()
-
-
-def main_make_alias():
-    """ command alias
-        hmake = httprunner make
-    """
-    sys.argv.insert(1, "make")
-    main()
-
-
-def main_har2case_alias():
-    """ command alias
-        har2case = httprunner har2case
-    """
-    sys.argv.insert(1, "har2case")
-    main()
-
-
 if __name__ == "__main__":
-    main()
+    run(['-v', '--html=report.html', 'testcase/userlogin.yml'])
+    # file = __BASE_PATH__.joinpath('resource', 'testcase/userlogin.yml')
+    # print(file)
+    # print(file.suffix.lower())
+    # print(file.suffixes)

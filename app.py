@@ -11,6 +11,7 @@ from settings import DEV
 from tasks import ext
 from web_service import socket_io
 from api import api
+from api_runner import api_runner
 from exceptions import *
 from utils import cache, limit, FlaskJSONEncoder
 
@@ -21,6 +22,7 @@ CORS(app)
 Session(app)
 db.init_app(app)
 app.register_blueprint(api)
+app.register_blueprint(api_runner)
 ext.init_app(app)
 celery = ext.celery
 socket_io.init_app(app, cors_allowed_origins='*')

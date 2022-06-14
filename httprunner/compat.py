@@ -1,5 +1,6 @@
 """
 This module handles compatibility issues between testcase format v2 and v3.
+处理V2 V3的用例不同， 处理兼容后可以删除
 """
 import os
 import sys
@@ -11,12 +12,12 @@ from httprunner import exceptions
 from httprunner.loader import load_project_meta, convert_relative_project_root_dir
 from httprunner.parser import parse_data
 from httprunner.utils import sort_dict_by_custom_order
+from pathlib import Path
 
 
 def convert_variables(
-    raw_variables: Union[Dict, List, Text], test_path: Text
+        raw_variables: Union[Dict, List, Text], test_path: Path
 ) -> Dict[Text, Any]:
-
     if isinstance(raw_variables, Dict):
         return raw_variables
 
@@ -250,34 +251,7 @@ def ensure_testcase_v3(test_content: Dict) -> Dict:
     return v3_content
 
 
-def ensure_cli_args(args: List) -> List:
-    """ ensure compatibility with deprecated cli args in v2
-    """
-    # remove deprecated --failfast
-    if "--failfast" in args:
-        logger.warning("remove deprecated argument: --failfast")
-        args.pop(args.index("--failfast"))
-
-    # convert --report-file to --html
-    if "--report-file" in args:
-        logger.warning("replace deprecated argument --report-file with --html")
-        index = args.index("--report-file")
-        args[index] = "--html"
-        args.append("--self-contained-html")
-
-    # keep compatibility with --save-tests in v2
-    if "--save-tests" in args:
-        logger.warning(
-            "generate conftest.py keep compatibility with --save-tests in v2"
-        )
-        args.pop(args.index("--save-tests"))
-        _generate_conftest_for_summary(args)
-
-    return args
-
-
 def _generate_conftest_for_summary(args: List):
-
     for arg in args:
         if os.path.exists(arg):
             test_path = arg

@@ -1,5 +1,6 @@
 import os
 import typing
+from pathlib import Path
 from enum import Enum
 from typing import Any
 from typing import Dict, Text, Union, Callable
@@ -45,7 +46,7 @@ class TConfig(BaseModel):
     # setup_hooks: Hooks = []
     # teardown_hooks: Hooks = []
     export: List[str] = []
-    path: str = None
+    path: Path = None
     weight: int = 1
 
 
@@ -91,7 +92,7 @@ class ProjectMeta(BaseModel):
     dot_env_path: Text = ""  # .env file path
     functions: FunctionsMapping = {}  # functions defined in debugtalk.py
     env: Env = {}
-    RootDir: Text = os.getcwd()  # project root directory (ensure absolute), the path located
+    RootDir: Path = Path().cwd()  # project root directory (ensure absolute), the path located
 
 
 class TestsMapping(BaseModel):
