@@ -47,8 +47,4 @@ def run(extra_args: list) -> enum.IntEnum:
 
 
 if __name__ == "__main__":
-    run(['-v', '--html=report.html', 'testcase/userlogin.yml'])
-    # file = __BASE_PATH__.joinpath('resource', 'testcase/userlogin.yml')
-    # print(file)
-    # print(file.suffix.lower())
-    # print(file.suffixes)
+    run(['-v', 'testcase/userlogin.yml'])

@@ -18,7 +18,7 @@ conf = {'username': 'root',
 
 
 class DEV:
-    DEBUG = True
+    DEBUG = False
     SECRET_KEY = '123'
     JSON_AS_ASCII = False  # 开启中文
 

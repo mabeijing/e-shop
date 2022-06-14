@@ -347,7 +347,7 @@ def load_debugtalk_functions() -> Dict[Text, Callable]:
     """
     # load debugtalk.py module
     try:
-        imported_module = importlib.import_module("debugtalk")
+        imported_module = importlib.import_module('httprunner.debugtalk')
     except Exception as ex:
         logger.error(f"error occurred in debugtalk.py: {ex}")
         sys.exit(1)

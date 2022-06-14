@@ -47,14 +47,14 @@ def index():
     return jsonify({'name': 'vmware'})
 
 
-@app.before_request
-def is_login():
-    session.permanent = False
-    white_list = [url_for('api.user_login'), url_for('api.user_register'), url_for('index')]
-    if request.path in white_list:
-        return
-    if not session.get('user_id'):
-        return UserNotLogin().serialize()
+# @app.before_request
+# def is_login():
+#     session.permanent = False
+#     white_list = [url_for('api.user_login'), url_for('api.user_register'), url_for('index')]
+#     if request.path in white_list:
+#         return
+#     if not session.get('user_id'):
+#         return UserNotLogin().serialize()
 
 
 @app.errorhandler(RateLimitExceeded)

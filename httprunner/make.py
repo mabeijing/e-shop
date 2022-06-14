@@ -2,7 +2,6 @@ import os
 import string
 import subprocess
 import sys
-import typing
 from typing import Dict, List, Set, Text, Tuple
 
 from loguru import logger
