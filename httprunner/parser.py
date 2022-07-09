@@ -5,7 +5,6 @@ import os
 from typing import Any, Set, Text, Callable, List, Dict
 
 from loguru import logger
-from sentry_sdk import capture_exception
 
 from httprunner import loader, utils, exceptions
 from httprunner.models import VariablesMapping, FunctionsMapping
@@ -135,7 +134,6 @@ def regex_findall_functions(content: Text) -> List[Text]:
     try:
         return function_regex_compile.findall(content)
     except TypeError as ex:
-        capture_exception(ex)
         return []
 
 

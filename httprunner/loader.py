@@ -4,7 +4,7 @@ import json
 import os
 import sys
 import types
-from typing import Callable, Dict, List, Text, Tuple, Optional, Mapping
+from typing import Callable, Dict, List, Text, Tuple, Optional
 from _types import FuncMapping
 import yaml
 from loguru import logger

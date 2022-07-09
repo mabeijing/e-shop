@@ -5,7 +5,6 @@ import sys
 from typing import Dict, List, Set, Text, Tuple
 
 from loguru import logger
-from sentry_sdk import capture_exception
 
 from httprunner import __version__, exceptions
 from httprunner.compat import (convert_variables, ensure_path_sep,
@@ -130,7 +129,6 @@ def format_pytest_with_black(*python_paths: Text):
             )
             [subprocess.run(["black", path]) for path in python_paths]
     except subprocess.CalledProcessError as ex:
-        capture_exception(ex)
         logger.error(ex)
         sys.exit(1)
     except OSError:

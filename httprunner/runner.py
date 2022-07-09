@@ -37,7 +37,7 @@ from httprunner.models import (
 )
 
 
-class HttpRunner(object):
+class HttpRunner:
     config: Config
     teststeps: List[Step]
 

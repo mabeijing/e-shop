@@ -7,7 +7,6 @@ from typing import Text
 
 from httprunner.compat import ensure_path_sep
 from loguru import logger
-from sentry_sdk import capture_exception
 
 from httprunner.ext.har2case import utils
 from httprunner.make import make_testcase, format_pytest_with_black
@@ -367,7 +366,6 @@ class HarParser(object):
         try:
             testcase = self._make_testcase()
         except Exception as ex:
-            capture_exception(ex)
             raise
 
         if file_type == "JSON":

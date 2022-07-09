@@ -30,15 +30,9 @@ def get_uniform_comparator(comparator: Text):
         return "string_equals"
     elif comparator in ["len_eq", "length_equal"]:
         return "length_equal"
-    elif comparator in [
-        "len_gt",
-        "length_greater_than",
-    ]:
+    elif comparator in ["len_gt", "length_greater_than"]:
         return "length_greater_than"
-    elif comparator in [
-        "len_ge",
-        "length_greater_or_equals",
-    ]:
+    elif comparator in ["len_ge", "length_greater_or_equals"]:
         return "length_greater_or_equals"
     elif comparator in ["len_lt", "length_less_than"]:
         return "length_less_than"
@@ -189,10 +183,10 @@ class ResponseObject(object):
         return extract_mapping
 
     def validate(
-        self,
-        validators: Validators,
-        variables_mapping: VariablesMapping = None,
-        functions_mapping: FunctionsMapping = None,
+            self,
+            validators: Validators,
+            variables_mapping: VariablesMapping = None,
+            functions_mapping: FunctionsMapping = None,
     ):
 
         variables_mapping = variables_mapping or {}

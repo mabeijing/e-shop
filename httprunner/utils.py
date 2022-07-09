@@ -5,24 +5,13 @@ import json
 import os
 import os.path
 import platform
-import uuid
 from multiprocessing import Queue
 from typing import Any, Dict, List
 
-import sentry_sdk
 from loguru import logger
 
 from httprunner import __version__, exceptions
 from httprunner.models import VariablesMapping
-
-
-def init_sentry_sdk():
-    sentry_sdk.init(
-        dsn="https://460e31339bcb428c879aafa6a2e78098@sentry.io/5263855",
-        release="httprunner@{}".format(__version__),
-    )
-    with sentry_sdk.configure_scope() as scope:
-        scope.set_user({"id": uuid.getnode()})
 
 
 def set_os_environ(variables_mapping):
@@ -264,5 +253,6 @@ def gen_cartesian_product(*args: List[Dict]) -> List[Dict]:
 
 if __name__ == '__main__':
     from pathlib import Path
+
     pth = Path()
     print(pth.absolute())

@@ -10,7 +10,7 @@ from httprunner.models import (
 )
 
 
-class Config(object):
+class Config:
     def __init__(self, name: Text):
         self.__name = name
         self.__variables = {}
