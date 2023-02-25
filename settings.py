@@ -8,7 +8,7 @@ from celery.schedules import crontab
 
 # 增加对数据库密码特殊字符的兼容
 conf = {'username': 'root',
-        'password': quote_plus('Root123!'),
+        'password': quote_plus('Root@123'),
         'host': 'localhost',
         'port': 3306,
         'database': 'e-shop'}
